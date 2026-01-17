@@ -186,134 +186,129 @@ function updateNavTabs() {
 
 function initCyberpunkServicesCarousel() {
     const servicesTrack = document.getElementById('servicesTrack');
-    const servicesInterface = servicesTrack.parentElement; // The .services-interface
-    const serviceWindows = Array.from(servicesTrack.getElementsByClassName('service-window'));
+    const servicesInterface = servicesTrack.parentElement;
+    let serviceWindows = []; // Will be populated after clones are setup
+
     const servicePrevBtn = document.getElementById('servicePrev');
     const serviceNextBtn = document.getElementById('serviceNext');
-    // const deepDiveModal = document.getElementById('service-deep-dive-modal'); // Not needed anymore
 
     let currentIndex = 0;
-    let expandedService = null; // Stores the service-window element that is currently in expanded preview mode
+    const numClonedItems = 2; // Number of items to clone on each side
 
+    // Helper to get computed gap
     const getServiceGap = () => {
         const style = window.getComputedStyle(servicesTrack);
-        const gap = parseInt(style.getPropertyValue('gap')) || 60;
-        return gap;
+        return parseFloat(style.getPropertyValue('gap')) || 30;
     };
 
-    const updateCarousel = () => {
-        // Centering logic
-        if (serviceWindows.length > 0) {
-            const containerWidth = servicesInterface.offsetWidth;
-            const currentActiveService = serviceWindows[currentIndex];
-            const itemWidth = currentActiveService ? currentActiveService.offsetWidth : 0;
-            const itemOffsetLeft = currentActiveService ? currentActiveService.offsetLeft : 0;
+    const setupClones = () => {
+        // Remove any existing clones first
+        servicesTrack.querySelectorAll('.is-clone').forEach(clone => clone.remove());
 
-            // Calculate the scroll position needed to center the item
-            // itemOffsetLeft is the left edge of the item relative to the track's start
-            // (containerWidth - itemWidth) / 2 is the offset needed to center the item if it were alone
-            const scrollLeft = itemOffsetLeft - (containerWidth - itemWidth) / 2;
-            servicesTrack.style.transform = `translateX(-${scrollLeft}px)`;
+        const realItems = Array.from(servicesTrack.children).filter(el => !el.classList.contains('is-clone'));
+        if (realItems.length === 0) return;
+
+        // Prepend clones of the last few items to the start
+        for (let i = 0; i < numClonedItems; i++) {
+            const clone = realItems[realItems.length - 1 - i].cloneNode(true);
+            clone.classList.add('is-clone');
+            servicesTrack.prepend(clone);
         }
 
+        // Append clones of the first few items to the end
+        for (let i = 0; i < numClonedItems; i++) {
+            const clone = realItems[i].cloneNode(true);
+            clone.classList.add('is-clone');
+            servicesTrack.append(clone);
+        }
+
+        // Re-get all service windows including clones
+        serviceWindows = Array.from(servicesTrack.getElementsByClassName('service-window'));
+        currentIndex = numClonedItems; // Set initial index to the first real item
+    };
+
+    const updateCarousel = (smoothTransition = true) => {
+        if (serviceWindows.length === 0) return;
+
+        const containerWidth = servicesInterface.offsetWidth;
+        const currentActiveService = serviceWindows[currentIndex];
+        
+        // Temporarily remove transforms to get accurate width for centering calculation
+        // This is crucial because transforms distort offsetWidth/offsetLeft
+        let originalTransform = currentActiveService.style.transform;
+        currentActiveService.style.transform = 'none'; 
+        const itemWidth = currentActiveService.offsetWidth;
+        currentActiveService.style.transform = originalTransform; // Restore
+
+        const itemOffsetLeft = currentActiveService.offsetLeft;
+        const scrollLeft = itemOffsetLeft - (containerWidth - itemWidth) / 2;
+
+        servicesTrack.style.transition = smoothTransition ? `transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)` : `none`;
+        servicesTrack.style.transform = `translateX(-${scrollLeft}px)`;
 
         serviceWindows.forEach((window, i) => {
-            window.classList.remove('active', 'prev', 'next', 'expanded');
+            window.classList.remove('active', 'prev', 'next');
             
-            // Remove all click listeners before re-adding to prevent duplicates
-            // We are changing the click behavior so ensure old listeners are gone
-            window.removeEventListener('click', handleServiceClick); 
+            // Remove previous event listeners to prevent duplicates
             const visualArea = window.querySelector('.service-visual-area');
-            if (visualArea) visualArea.removeEventListener('click', handleServiceClick);
+            if (visualArea) visualArea.removeEventListener('click', handleViewDetailsClickWrapper);
 
             const viewFullDetailsButton = window.querySelector('.view-full-details-btn');
             if (viewFullDetailsButton) {
-                // Change: This button now loads a new module, not the old modal
-                viewFullDetailsButton.removeEventListener('click', handleViewDetailsClick); 
+                viewFullDetailsButton.removeEventListener('click', handleViewDetailsClickWrapper); 
             }
 
             if (i === currentIndex) {
                 window.classList.add('active');
-                // Attach click listener only to the visual area for the first click (expand preview)
-                if (visualArea) visualArea.addEventListener('click', handleServiceClick);
-                if (expandedService === window) {
-                    window.classList.add('expanded');
-                    populateExpandedPreview(window);
-                }
-            } else {
-                if (i === (currentIndex - 1 + serviceWindows.length) % serviceWindows.length) {
-                    window.classList.add('prev');
-                } else if (i === (currentIndex + 1) % serviceWindows.length) {
-                    window.classList.add('next');
-                }
-                window.classList.remove('expanded');
+            } else if (i === currentIndex - 1) { // Direct previous
+                window.classList.add('prev');
+            } else if (i === currentIndex + 1) { // Direct next
+                window.classList.add('next');
+            }
+            
+            // Re-attach event listeners only for real items (not clones, or if cloning causes issues)
+            if (!window.classList.contains('is-clone')) {
+                if (visualArea) visualArea.addEventListener('click', handleViewDetailsClickWrapper);
+                if (viewFullDetailsButton) viewFullDetailsButton.addEventListener('click', handleViewDetailsClickWrapper);
             }
         });
-
-        // Keep nav buttons visible - this was already done, confirming
-        servicePrevBtn.style.display = 'block';
-        serviceNextBtn.style.display = 'block';
+        
+        // Handle cloning for infinite loop effect (snap back)
+        if (currentIndex < numClonedItems || currentIndex >= serviceWindows.length - numClonedItems) {
+            const realItemsCount = serviceWindows.length - (2 * numClonedItems);
+            
+            const transitionHandler = () => {
+                servicesTrack.removeEventListener('transitionend', transitionHandler); // Clean up
+                if (currentIndex < numClonedItems) {
+                    currentIndex = realItemsCount + currentIndex;
+                } else { // currentIndex >= serviceWindows.length - numClonedItems
+                    currentIndex = currentIndex - realItemsCount;
+                }
+                updateCarousel(false); // Snap without transition
+            };
+            
+            if (smoothTransition) {
+                servicesTrack.addEventListener('transitionend', transitionHandler);
+            } else {
+                // If not a smooth transition, just snap immediately
+                transitionHandler();
+            }
+        }
     };
 
     const navigate = (direction) => {
-        if (expandedService) {
-            // Clicking nav buttons while expanded should collapse and then navigate
-            expandedService.classList.remove('expanded');
-            expandedService = null;
-            updateCarousel(); // Re-render to clear expanded state and re-enable full carousel
-            // Fall through to actual navigation
-        }
-
-        currentIndex = (currentIndex + direction + serviceWindows.length) % serviceWindows.length;
+        currentIndex += direction;
         updateCarousel();
     };
 
-    const handleServiceClick = (event) => {
+    const handleViewDetailsClickWrapper = (event) => {
         const clickedWindow = event.currentTarget.closest('.service-window');
-        if (!clickedWindow || !clickedWindow.classList.contains('active')) return;
-
-        // Toggle expanded state
-        if (expandedService === clickedWindow) {
-            // If already expanded, collapse it (second click on same expanded item)
-            clickedWindow.classList.remove('expanded');
-            expandedService = null;
-        } else {
-            // First click on an active service -> Enter Expanded Preview Mode
-            if (expandedService) {
-                expandedService.classList.remove('expanded'); // Collapse previously expanded service
-            }
-            clickedWindow.classList.add('expanded');
-            expandedService = clickedWindow;
-            populateExpandedPreview(clickedWindow);
-        }
-        updateCarousel(); // Re-run to ensure proper state and potential centering adjust
-    };
-
-    const populateExpandedPreview = (serviceElement) => {
-        const terminalWindow = serviceElement.querySelector('.service-terminal-window');
-        const description = serviceElement.dataset.description;
-        const features = JSON.parse(serviceElement.dataset.features || '[]');
-        const serviceId = serviceElement.dataset.serviceId; // Get ID for detail page
-
-        terminalWindow.querySelector('.terminal-intro').textContent = description;
-
-        const featuresList = terminalWindow.querySelector('.terminal-features');
-        featuresList.innerHTML = '';
-        features.forEach(feature => {
-            const li = document.createElement('li');
-            li.textContent = feature;
-            featuresList.appendChild(li);
-        });
-
-        const btn = terminalWindow.querySelector('.view-full-details-btn');
-        if (btn) {
-            btn.removeEventListener('click', handleViewDetailsClick); // Remove old listener
-            btn.addEventListener('click', () => handleViewDetailsClick(serviceId)); // Attach new listener
+        if (clickedWindow && !clickedWindow.classList.contains('is-clone')) { // Ensure it's a real item
+            handleViewDetailsClick(clickedWindow.dataset.serviceId);
         }
     };
 
     const handleViewDetailsClick = (serviceId) => {
-        // Load the new detail module instead of opening a modal
         if (window.loadModule) {
             window.loadModule('service_detail', serviceId);
         } else {
@@ -324,17 +319,14 @@ function initCyberpunkServicesCarousel() {
     // Attach event listeners
     servicePrevBtn.addEventListener('click', () => navigate(-1));
     serviceNextBtn.addEventListener('click', () => navigate(1));
-    // Close deepDiveModal functions are no longer relevant to initCyberpunkServicesCarousel
-    // The deepDiveModal is replaced by a new module load
-    // deepDiveModal.querySelector('.modal-footer-btn').addEventListener('click', closeServiceDeepDiveModal);
-    // document.addEventListener('keydown', (event) => {
-    //     if (event.key === 'Escape' && deepDiveModal.style.display === 'flex') {
-    //         closeServiceDeepDiveModal();
-    //     }
-    // });
 
-    updateCarousel(); // Initial setup
-    window.addEventListener('resize', updateCarousel);
+    // Initial setup
+    setupClones();
+    updateCarousel(false); // Initial positioning without transition
+    window.addEventListener('resize', () => {
+        setupClones(); // Re-setup clones on resize to handle width changes
+        updateCarousel(false); // Recalculate on resize, without transition
+    });
 }
 
 
@@ -396,13 +388,7 @@ function initLogsInteractions() {
     });
 }
 
-// Global function (used by onclick in HTML) for modals that are NOT modules
-// Keeping this as a global utility function that might be called from old HTML
-function closeServiceDeepDiveModal() { // This function is now mostly vestigial, as the modal is replaced by a module
-    const deepDiveModal = document.getElementById('service-deep-dive-modal');
-    if (deepDiveModal) deepDiveModal.style.display = 'none';
-    document.body.classList.remove('modal-open');
-}
+
 
 function initConnectInteractions() {
     const form = document.querySelector('.connect-form');

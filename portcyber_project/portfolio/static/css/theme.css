@@ -1893,76 +1893,6 @@ body {
     letter-spacing: 1px;
 }
 
-/* TERMINAL PREVIEW */
-.service-terminal-window {
-    background: rgba(0, 0, 0, 0.85); /* Dark background for terminal */
-    border: 1px solid #00ff88; /* Green border */
-    padding: 20px;
-    margin-top: 25px;
-    color: #00ff88; /* Default text color green */
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.6;
-    overflow-y: auto; /* Enable scrolling for long content */
-    max-height: 300px; /* Adjust as needed */
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.4s ease;
-}
-
-/* TERMINAL VISIBLE WHEN EXPANDED */
-.service-window.expanded .service-terminal-window {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.service-terminal-window .terminal-intro {
-    margin-bottom: 15px;
-    color: #fff; /* White for main description */
-}
-
-.service-terminal-window .terminal-features {
-    list-style: none; /* Remove default list style */
-    padding-left: 0;
-    margin-bottom: 15px;
-}
-
-.service-terminal-window .terminal-features li {
-    position: relative;
-    padding-left: 20px; /* Space for custom bullet */
-    margin-bottom: 5px;
-    color: #ffd700; /* Yellow for features */
-}
-
-.service-terminal-window .terminal-features li::before {
-    content: '▸'; /* Custom cyberpunk bullet */
-    position: absolute;
-    left: 0;
-    color: #ff3366; /* Red bullet */
-}
-
-.service-terminal-window .view-full-details-btn {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 20px;
-    background: #ff3366; /* Red button */
-    border: 1px solid #ff3366;
-    color: #000;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none; /* Ensure no underline */
-}
-
-.service-terminal-window .view-full-details-btn:hover {
-    background: #00ff88; /* Green on hover */
-    border-color: #00ff88;
-    color: #000;
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.7);
-}
-
 /* NAVIGATION BUTTONS */
 .service-nav-btn {
     position: absolute;
@@ -1998,6 +1928,131 @@ body {
     }
 
     .service-window.prev,
+    .service-window.next {
+        /* Keep these hidden or less prominent on small screens */
+        opacity: 0.2;
+        pointer-events: none;
+    }
+}
+
+/* Styles for the View Details Button inside service-overlay-text */
+.service-overlay-text .view-full-details-btn {
+    display: inline-block;
+    margin-top: 15px; /* Adjust spacing from description */
+    padding: 8px 15px;
+    background: #00ff88; /* Green button */
+    border: 1px solid #00ff88;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 9px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none; /* Ensure no underline */
+}
+
+.service-overlay-text .view-full-details-btn:hover {
+    background: #ff3366; /* Red on hover */
+    border-color: #ff3366;
+    color: #000;
+    box-shadow: 0 0 10px rgba(255, 51, 102, 0.7);
+}
+
+/* STAGE */
+.services-interface {
+    position: relative;
+    width: 100%; /* Ensure it takes full width */
+    margin: 0 auto 80px auto;
+    perspective: 1400px;
+    overflow: hidden; /* Keep overflow hidden for track scrolling */
+}
+
+/* TRACK */
+.services-track {
+    display: flex;
+    gap: 30px; /* Reduced gap for more items on screen */
+    transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+    align-items: stretch; /* Stretch items to fill height */
+    justify-content: center; /* Horizontally center items within track */
+}
+
+/* SERVICE WINDOW */
+.service-window {
+    flex: 0 0 450px; /* Base width, adjust as needed */
+    max-width: 450px; /* Limit max width */
+    position: relative;
+    transform-origin: center;
+    transform: scale(0.78) rotateY(18deg);
+    opacity: 0.35;
+    filter: blur(1px);
+    transition:
+        transform 0.6s ease,
+        opacity 0.6s ease,
+        filter 0.6s ease,
+        box-shadow 0.6s ease,
+        flex-basis 0.6s ease,
+        max-width 0.6s ease; /* Add flex-basis and max-width to transition */
+    cursor: pointer;
+    height: auto; /* Allow height to adjust to content */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Push overlay to bottom */
+}
+
+/* ACTIVE (CENTER) */
+.service-window.active {
+    flex: 0 0 600px; /* Larger base for active item */
+    max-width: 600px;
+    transform: scale(1) rotateY(0deg);
+    opacity: 1;
+    filter: none;
+    z-index: 5;
+}
+
+/* LEFT / RIGHT PREVIEWS */
+.service-window.prev,
+.service-window.next {
+    flex: 0 0 350px; /* Smaller base for preview items */
+    max-width: 350px;
+    transform: scale(0.85) rotateY(-18deg); /* Original transform */
+    opacity: 0.6;
+}
+
+/* OVERLAY TEXT */
+.service-overlay-text {
+    position: absolute;
+    bottom: 0; /* Align to bottom */
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 16px 20px;
+    border-top: 4px solid #ff3366; /* Border at top of overlay */
+    backdrop-filter: blur(4px);
+    display: flex; /* Use flexbox for button alignment */
+    flex-direction: column;
+    align-items: flex-start; /* Align text to start */
+    justify-content: flex-end; /* Push content to bottom */
+    min-height: 100px; /* Ensure space for text and button */
+}
+
+.service-overlay-text h2 {
+    font-size: 14px;
+    color: #ff3366;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    line-height: 1.2;
+}
+
+.service-overlay-text p {
+    font-size: 10px;
+    color: #ffd700; /* Already yellow */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0; /* Remove bottom margin to align button correctly */
+}
+
     .service-window.next {
         display: none;
     }

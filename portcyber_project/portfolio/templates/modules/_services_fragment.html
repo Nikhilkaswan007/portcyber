@@ -24,13 +24,9 @@
                     <div class="service-overlay-text">
                         <h2>WEB DEVELOPMENT</h2>
                         <p>Frontend & Full-Stack Applications</p>
+                        <!-- Added View Details Button Directly to overlay -->
+                        <button class="view-full-details-btn">View Details</button>
                     </div>
-                </div>
-                <!-- This will be populated by JS for expanded preview -->
-                <div class="service-terminal-window">
-                    <p class="terminal-intro"></p>
-                    <ul class="terminal-features"></ul>
-                    <button class="view-full-details-btn">View Full Details</button>
                 </div>
             </div>
 
@@ -48,12 +44,8 @@
                     <div class="service-overlay-text">
                         <h2>UI / UX DESIGN</h2>
                         <p>Interfaces & Experience</p>
+                        <button class="view-full-details-btn">View Details</button>
                     </div>
-                </div>
-                <div class="service-terminal-window">
-                    <p class="terminal-intro"></p>
-                    <ul class="terminal-features"></ul>
-                    <button class="view-full-details-btn">View Full Details</button>
                 </div>
             </div>
 
@@ -71,12 +63,8 @@
                     <div class="service-overlay-text">
                         <h2>SYSTEM ARCHITECTURE</h2>
                         <p>Scalable Digital Systems</p>
+                        <button class="view-full-details-btn">View Details</button>
                     </div>
-                </div>
-                <div class="service-terminal-window">
-                    <p class="terminal-intro"></p>
-                    <ul class="terminal-features"></ul>
-                    <button class="view-full-details-btn">View Full Details</button>
                 </div>
             </div>
 
@@ -94,12 +82,8 @@
                     <div class="service-overlay-text">
                         <h2>CONSULTING</h2>
                         <p>Guidance & Strategy</p>
+                        <button class="view-full-details-btn">View Details</button>
                     </div>
-                </div>
-                <div class="service-terminal-window">
-                    <p class="terminal-intro"></p>
-                    <ul class="terminal-features"></ul>
-                    <button class="view-full-details-btn">View Full Details</button>
                 </div>
             </div>
 
@@ -107,32 +91,4 @@
 
         <button class="service-nav-btn right" id="serviceNext">▶</button>
     </section>
-
-    <!-- Service Detail Modal (Deep Dive) -->
-    <div class="service-deep-dive-modal-overlay" id="service-deep-dive-modal" style="display: none;">
-        <div class="service-deep-dive-modal-content">
-            <div class="modal-close-btn" onclick="closeServiceDeepDiveModal()">✕</div>
-            <div class="modal-header">
-                <h3 id="modal-service-title"></h3>
-                <span id="modal-service-status" class="status-badge">Status: ACTIVE</span>
-            </div>
-            <div class="modal-body">
-                <div class="modal-visual-area">
-                    <img id="modal-service-image" src="" alt="Service Visual">
-                </div>
-                <div class="modal-terminal-output">
-                    <p id="modal-service-description"></p>
-                    <h4>Capabilities:</h4>
-                    <ul id="modal-service-features"></ul>
-                    <h4>Use Cases:</h4>
-                    <p id="modal-service-usecases"></p>
-                    <h4>Outcome:</h4>
-                    <p id="modal-service-outcome"></p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-footer-btn" onclick="closeServiceDeepDiveModal()">Close</button>
-            </div>
-        </div>
-    </div>
 </div>
