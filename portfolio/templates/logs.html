@@ -1,0 +1,326 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK - System Logs</title>
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <style>
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title h1 {
+            font-size: 14px;
+            color: #000;
+            background: #ff3366;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            display: inline-block;
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+
+        .log-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .log-entry {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .log-entry:hover {
+            border-color: #ff3366;
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.3);
+            transform: translateX(5px);
+        }
+
+        .log-header {
+            background: #ff3366;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .log-title {
+            font-size: 12px;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .log-date {
+            font-size: 10px;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .log-meta {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 51, 102, 0.2);
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .log-meta-item {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .log-meta-label {
+            color: #888;
+        }
+
+        .log-meta-value {
+            color: #ff3366;
+            margin-left: 5px;
+        }
+
+        .log-body {
+            padding: 20px;
+        }
+
+        .log-section {
+            margin-bottom: 25px;
+        }
+
+        .log-section-title {
+            font-size: 11px;
+            color: #000;
+            background: #ff3366;
+            padding: 5px 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .log-section-content {
+            font-size: 11px;
+            line-height: 1.8;
+            color: #aaa;
+            padding-left: 15px;
+        }
+
+        .log-section-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .log-section-content li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .log-section-content li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #ff3366;
+        }
+
+        .older-logs {
+            margin-top: 40px;
+            border-top: 2px solid rgba(255, 51, 102, 0.3);
+            padding-top: 30px;
+        }
+
+        .older-logs-title {
+            font-size: 12px;
+            color: #000;
+            background: #ff3366;
+            padding: 8px 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .older-log-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .older-log-item {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 51, 102, 0.2);
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .older-log-item:hover {
+            border-color: #ff3366;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(255, 51, 102, 0.3);
+        }
+
+        .older-log-item-title {
+            font-size: 11px;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .older-log-item-date {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div id="three-background"></div>
+    <div class="scanline"></div>
+
+    <div class="header">
+        <div class="level-info">
+            <div class="level"><span class="level-badge">{{ level }}</span> LEVEL</div>
+            <div class="coins">
+                <span style="margin-right: 5px;">+</span>
+                <span>{{ coins }}</span>
+                <span style="margin-left: 5px; font-size: 12px;">COINS AWARDED</span>
+            </div>
+        </div>
+        <div class="time-info">
+            <div>CREDITS</div>
+            <div>SERVER TIME: <span id="server-time">--:--</span></div>
+            <div>LOCAL TIME: <span id="local-time">--:--</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="profile-img">
+            <img src="https://via.placeholder.com/150/ff3366/000000?text=NK" alt="Profile">
+        </div>
+        <div class="profile-info">
+            <div class="profile-name">{{ profile_name }}</div>
+            <div class="profile-title">{{ profile_title }}</div>
+            <div class="profile-company">Legacy.ai</div>
+            <div class="profile-status">
+                <div class="status-icon"></div>
+                <span>OPEN FOR HIRE</span>
+            </div>
+        </div>
+        <a href="#" class="social-btn">
+            <span>🔗</span>
+            <span>OPEN CONNECTION</span>
+        </a>
+        <div class="motto">
+            DOCUMENTING<br>
+            THE JOURNEY<br>
+            OF GROWTH.
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-title">
+            <h1>SYSTEM LOGS</h1>
+        </div>
+
+        <div class="log-container">
+            <div class="log-entry">
+                <div class="log-header">
+                    <div class="log-title">📝 DJANGO PORTFOLIO MIGRATION</div>
+                    <div class="log-date">JANUARY 2026</div>
+                </div>
+                <div class="log-meta">
+                    <span class="log-meta-item"><span class="log-meta-label">STATUS:</span><span class="log-meta-value">COMPLETED</span></span>
+                    <span class="log-meta-item"><span class="log-meta-label">TYPE:</span><span class="log-meta-value">SYSTEM UPGRADE</span></span>
+                </div>
+                <div class="log-body">
+                    <div class="log-section">
+                        <div class="log-section-title">SUMMARY</div>
+                        <div class="log-section-content">
+                            Successfully migrated cyberpunk portfolio to Django framework. This represents a major architectural shift from static HTML to a full-stack Python application with dynamic templating and backend capabilities.
+                        </div>
+                    </div>
+                    <div class="log-section">
+                        <div class="log-section-title">TASKS COMPLETED</div>
+                        <div class="log-section-content">
+                            <ul>
+                                <li>Django project initialization and configuration</li>
+                                <li>Portfolio app creation with views and templates</li>
+                                <li>Static file organization (CSS, JavaScript, assets)</li>
+                                <li>Template inheritance and base layout implementation</li>
+                                <li>Three.js background integration</li>
+                                <li>Cyberpunk theme CSS consolidation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="log-entry">
+                <div class="log-header">
+                    <div class="log-title">🎨 CYBERPUNK UI DEVELOPMENT</div>
+                    <div class="log-date">DECEMBER 2025</div>
+                </div>
+                <div class="log-meta">
+                    <span class="log-meta-item"><span class="log-meta-label">STATUS:</span><span class="log-meta-value">COMPLETED</span></span>
+                    <span class="log-meta-item"><span class="log-meta-label">TYPE:</span><span class="log-meta-value">DESIGN</span></span>
+                </div>
+                <div class="log-body">
+                    <div class="log-section">
+                        <div class="log-section-title">SUMMARY</div>
+                        <div class="log-section-content">
+                            Designed and implemented a complete cyberpunk-themed interface system featuring neon colors, glassmorphism, scanlines, and a terminal-style HUD aesthetic.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="older-logs">
+            <div class="older-logs-title">ARCHIVED LOGS</div>
+            <div class="older-log-list">
+                <div class="older-log-item">
+                    <div class="older-log-item-title">Initial HTML Concepts</div>
+                    <div class="older-log-item-date">September 2025</div>
+                </div>
+                <div class="older-log-item">
+                    <div class="older-log-item-title">Three.js Integration</div>
+                    <div class="older-log-item-date">October 2025</div>
+                </div>
+                <div class="older-log-item">
+                    <div class="older-log-item-title">Animation Framework</div>
+                    <div class="older-log-item-date">November 2025</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-tabs" style="margin-top: 60px;">
+            <a href="{% url 'dashboard' %}" class="nav-tab">BEGINNING</a>
+            <a href="{% url 'logs' %}" class="nav-tab active">LOGS</a>
+            <a href="{% url 'achievements' %}" class="nav-tab">ACHIEVEMENTS</a>
+            <a href="{% url 'creations' %}" class="nav-tab">CREATIONS</a>
+        </div>
+    </div>
+
+    <div class="settings-panel">
+        <div class="setting-btn active" id="sound-fx" title="Sound Effects">🔊</div>
+        <div class="setting-btn" id="music" title="Music">🎵</div>
+        <div class="setting-btn" id="visual-settings" title="Visual Settings">⚙️</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
+</body>
+</html>

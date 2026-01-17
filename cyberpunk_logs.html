@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK - System Logs</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        #three-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .level {
+            font-size: 24px;
+            color: #00ff88;
+        }
+
+        .level-badge {
+            background: rgba(255, 51, 102, 0.2);
+            padding: 5px 10px;
+            border: 1px solid #ff3366;
+            border-radius: 3px;
+        }
+
+        .coins {
+            font-size: 20px;
+            color: #ffd700;
+        }
+
+        .time-info {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: right;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 220px;
+            height: calc(100vh - 80px);
+            background: rgba(0, 0, 0, 0.8);
+            border-right: 1px solid rgba(255, 51, 102, 0.3);
+            padding: 30px 0;
+            z-index: 99;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            border: 3px solid #ff3366;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+        }
+
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            text-align: center;
+            padding: 0 20px;
+            margin-bottom: 30px;
+        }
+
+        .profile-name {
+            font-size: 16px;
+            color: #000;
+            background: #ff3366;
+            padding: 5px 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .profile-title {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .profile-company {
+            font-size: 10px;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-status {
+            margin-top: 15px;
+            padding: 8px;
+            background: rgba(255, 51, 102, 0.2);
+            border: 1px solid #ff3366;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            margin: 20px;
+            background: transparent;
+            border: 1px solid #ff3366;
+            color: #ff3366;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .social-btn:hover {
+            background: #ff3366;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+        }
+
+        .main-content {
+            margin-left: 220px;
+            margin-top: 80px;
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+            min-height: calc(100vh - 80px);
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title h1 {
+            font-size: 14px;
+            color: #000;
+            background: #ff3366;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            display: inline-block;
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+
+        .log-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .log-entry {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .log-entry:hover {
+            border-color: #ff3366;
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.3);
+            transform: translateX(5px);
+        }
+
+        .log-header {
+            background: #ff3366;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .log-title {
+            font-size: 12px;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .log-date {
+            font-size: 10px;
+            color: #000;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .log-meta {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 51, 102, 0.2);
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .log-meta-item {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .log-meta-label {
+            color: #888;
+        }
+
+        .log-meta-value {
+            color: #ff3366;
+            margin-left: 5px;
+        }
+
+        .log-body {
+            padding: 20px;
+        }
+
+        .log-section {
+            margin-bottom: 25px;
+        }
+
+        .log-section-title {
+            font-size: 11px;
+            color: #000;
+            background: #ff3366;
+            padding: 5px 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .log-section-content {
+            font-size: 11px;
+            line-height: 1.8;
+            color: #aaa;
+            padding-left: 15px;
+        }
+
+        .log-section-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .log-section-content li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .log-section-content li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #ff3366;
+        }
+
+        .expand-btn {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid #ff3366;
+            color: #ff3366;
+            padding: 10px 20px;
+            margin: 15px 20px;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .expand-btn:hover {
+            background: #ff3366;
+            color: #000;
+        }
+
+        .older-logs {
+            margin-top: 40px;
+            border-top: 2px solid rgba(255, 51, 102, 0.3);
+            padding-top: 30px;
+        }
+
+        .older-logs-title {
+            font-size: 12px;
+            color: #000;
+            background: #ff3366;
+            padding: 8px 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .older-log-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .older-log-item {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 51, 102, 0.2);
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .older-log-item:hover {
+            border-color: #ff3366;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(255, 51, 102, 0.3);
+        }
+
+        .older-log-item-title {
+            font-size: 11px;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .older-log-item-date {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            color: #888;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ff3366;
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+            z-index: -1;
+        }
+
+        .nav-tab.active {
+            border-color: #ff3366;
+            color: #000;
+            background: #ff3366;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>') center/contain no-repeat;
+        }
+
+        .nav-tab:hover {
+            border-color: #ff3366;
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.3);
+        }
+
+        .nav-tab:hover::before {
+            transform: translateX(0);
+        }
+
+        .settings-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 98;
+        }
+
+        .setting-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .setting-btn:hover {
+            border-color: #ff3366;
+            background: rgba(255, 51, 102, 0.1);
+        }
+
+        .setting-btn.active {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .setting-btn.active::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .log-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="three-background"></div>
+    <div class="scanline"></div>
+
+    <div class="header">
+        <div class="level-info">
+            <div class="level"><span class="level-badge">48</span> LEVEL</div>
+            <div class="coins">
+                <span style="margin-right: 5px;">+</span>
+                <span>1,425</span>
+                <span style="margin-left: 5px; font-size: 12px;">COINS AWARDED</span>
+            </div>
+        </div>
+        <div class="time-info">
+            <div>CREDITS</div>
+            <div>SERVER TIME: <span id="server-time">6:52</span></div>
+            <div>LOCAL TIME: <span id="local-time">13:42</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="profile-img">
+            <img src="https://via.placeholder.com/150/ff3366/000000?text=NK" alt="Profile">
+        </div>
+        <div class="profile-info">
+            <div class="profile-name">Nikhil Kaswan</div>
+            <div class="profile-title">Web Developer</div>
+            <div class="profile-company">Legacy.ai</div>
+            <div class="profile-status">
+                <div class="status-icon" style="width: 8px; height: 8px; background: #ff3366; border-radius: 50%;"></div>
+                <span>OPEN FOR HIRE</span>
+            </div>
+        </div>
+        <a href="#" class="social-btn">
+            <span>🔗</span>
+            <span>OPEN CONNECTION</span>
+        </a>
+    </div>
+
+    <div class="main-content">
+        <div class="page-title">
+            <h1>DATA LOG DUMP INITIALIZED.</h1>
+        </div>
+
+        <div class="log-container">
+            <!-- Main Log Entry -->
+            <div class="log-entry">
+                <div class="log-header">
+                    <div class="log-title">LOG ENTRY: PROJECT DEVELOPMENT UPDATE</div>
+                    <div class="log-date">DATE: 2007.04.25</div>
+                </div>
+                <div class="log-meta">
+                    <span class="log-meta-item">
+                        <span class="log-meta-label">LOCATION:</span>
+                        <span class="log-meta-value">RESEARCH FACILITY, PLANET X-49</span>
+                    </span>
+                    <span class="log-meta-item">
+                        <span class="log-meta-label">PROJECT STATUS:</span>
+                        <span class="log-meta-value">IN DEVELOPMENT</span>
+                    </span>
+                </div>
+                <div class="log-body">
+                    <div class="log-section">
+                        <div class="log-section-title">PROJECT UPDATE</div>
+                        <div class="log-section-content">
+                            The development team has been working tirelessly on the latest iteration of the project. Significant progress has been made in the areas of neural interface integration, machine learning algorithms, and quantum computing.
+                        </div>
+                    </div>
+
+                    <div class="log-section">
+                        <div class="log-section-title">CHALLENGES</div>
+                        <div class="log-section-content">
+                            The team has encountered several challenges during the development process, including unexpected system crashes, hardware malfunctions, and unanticipated compatibility issues.
+                            <ul>
+                                <li>Expand</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="log-section">
+                        <div class="log-section-title">NEXT STEPS</div>
+                        <div class="log-section-content">
+                            The development team has been working tirelessly on the latest iteration of the project. Significant progress has been made in the areas of neural interface integration, machine learning algorithms, and quantum computing.
+                        </div>
+                    </div>
+
+                    <div class="log-section">
+                        <div class="log-section-title">CONCLUSION</div>
+                        <div class="log-section-content">
+                            Despite the challenges encountered, the team remains optimistic about the potential of the project. The development of advanced neural interface technology has the potential to revolutionize various industries.
+                            <ul>
+                                <li>Expand</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <button class="expand-btn">PREVIEW VISUAL RECORDS ↗</button>
+                </div>
+            </div>
+
+            <!-- Older Logs Section -->
+            <div class="older-logs">
+                <div class="older-logs-title">OLDER LOGS:</div>
+                <div class="older-log-list">
+                    <div class="older-log-item">
+                        <div class="older-log-item-title">LOG ENTRY: PROJECT DEVELOPMENT UPDATE</div>
+                        <div class="older-log-item-date">DATE: 2007.04.25</div>
+                    </div>
+                    <div class="older-log-item">
+                        <div class="older-log-item-title">LOG ENTRY: NEW PROJECT STARTED</div>
+                        <div class="older-log-item-date">DATE: 2007.03.25</div>
+                    </div>
+                    <div class="older-log-item">
+                        <div class="older-log-item-title">LOG ENTRY: RELEASE STORY</div>
+                        <div class="older-log-item-date">DATE: 2007.04.25</div>
+                    </div>
+                    <div class="older-log-item">
+                        <div class="older-log-item-title">LOG ENTRY: VISUAL UPDATES</div>
+                        <div class="older-log-item-date">DATE: 2007.04.25</div>
+                    </div>
+                    <div class="older-log-item">
+                        <div class="older-log-item-title">LOG ENTRY: GOING PUBLIC</div>
+                        <div class="older-log-item-date">DATE: 2007.04.25</div>
+                    </div>
+                    <div class="older-log-item">
+                        <div class="older-log-item-title">LOG ENTRY: BETA PROGRAM</div>
+                        <div class="older-log-item-date">DATE: 2007.04.25</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <a href="main.html" class="nav-tab">BEGINNING</a>
+            <a href="logs.html" class="nav-tab active">LOGS</a>
+            <a href="achievements.html" class="nav-tab">ACHIEVEMENTS</a>
+            <a href="creations.html" class="nav-tab">CREATIONS</a>
+            <a href="games.html" class="nav-tab">GAMES</a>
+        </div>
+    </div>
+
+    <div class="settings-panel">
+        <div class="setting-btn active" id="sound-fx" title="Sound Effects">🔊</div>
+        <div class="setting-btn" id="music" title="Music">🎵</div>
+        <div class="setting-btn" id="visual-settings" title="Visual Settings">⚙️</div>
+    </div>
+
+    <script>
+        // Three.js background (same as main page)
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('three-background').appendChild(renderer.domElement);
+
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 100;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            color: 0xff3366,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        const gridHelper = new THREE.GridHelper(100, 50, 0xff3366, 0x333333);
+        gridHelper.position.y = -10;
+        scene.add(gridHelper);
+
+        camera.position.z = 30;
+        camera.position.y = 5;
+
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x = mouseY * 0.1;
+            particlesMesh.rotation.z = mouseX * 0.1;
+            camera.position.x = mouseX * 2;
+            camera.position.y = 5 + mouseY * 2;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Update times
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('local-time').textContent = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            document.getElementById('server-time').textContent = new Date(now.getTime() - 7 * 60 * 60 * 1000).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Settings buttons
+        document.querySelectorAll('.setting-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Log entry click handlers
+        document.querySelectorAll('.older-log-item').forEach(item => {
+            item.addEventListener('click', function() {
+                alert('This log entry would open in a modal or expand inline');
+            });
+        });
+    </script>
+</body>
+</html>

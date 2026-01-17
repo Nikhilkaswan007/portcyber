@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK - Achievements</title>
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <style>
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title h1 {
+            font-size: 14px;
+            color: #000;
+            background: #ff3366;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            display: inline-block;
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .achievement-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 51, 102, 0.3);
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .achievement-card:hover {
+            border-color: #ff3366;
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .achievement-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .achievement-name {
+            font-size: 13px;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .achievement-description {
+            font-size: 10px;
+            color: #888;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .achievement-reward {
+            font-size: 11px;
+            color: #00ff88;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .achievement-progress {
+            margin-top: 15px;
+            background: rgba(255, 51, 102, 0.1);
+            height: 6px;
+            border: 1px solid #ff3366;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff3366, #00ff88);
+            width: 75%;
+            transition: width 0.5s;
+        }
+
+        .locked-achievement {
+            opacity: 0.5;
+            border-color: rgba(255, 51, 102, 0.1);
+        }
+
+        .locked-achievement:hover {
+            border-color: rgba(255, 51, 102, 0.1);
+            transform: translateY(0);
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="three-background"></div>
+    <div class="scanline"></div>
+
+    <div class="header">
+        <div class="level-info">
+            <div class="level"><span class="level-badge">{{ level }}</span> LEVEL</div>
+            <div class="coins">
+                <span style="margin-right: 5px;">+</span>
+                <span>{{ coins }}</span>
+                <span style="margin-left: 5px; font-size: 12px;">COINS AWARDED</span>
+            </div>
+        </div>
+        <div class="time-info">
+            <div>CREDITS</div>
+            <div>SERVER TIME: <span id="server-time">--:--</span></div>
+            <div>LOCAL TIME: <span id="local-time">--:--</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="profile-img">
+            <img src="https://via.placeholder.com/150/ff3366/000000?text=NK" alt="Profile">
+        </div>
+        <div class="profile-info">
+            <div class="profile-name">{{ profile_name }}</div>
+            <div class="profile-title">{{ profile_title }}</div>
+            <div class="profile-company">Legacy.ai</div>
+            <div class="profile-status">
+                <div class="status-icon"></div>
+                <span>OPEN FOR HIRE</span>
+            </div>
+        </div>
+        <a href="#" class="social-btn">
+            <span>🔗</span>
+            <span>OPEN CONNECTION</span>
+        </a>
+        <div class="motto">
+            UNLOCKING SKILLS<br>
+            EARNING REWARDS<br>
+            BUILDING LEGACY.
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-title">
+            <h1>ACHIEVEMENTS & QUESTS</h1>
+        </div>
+
+        <div class="achievements-grid">
+            <div class="achievement-card">
+                <div class="achievement-icon">🏆</div>
+                <div class="achievement-name">FIRST WEBSITE</div>
+                <div class="achievement-description">Create and deploy your first website</div>
+                <div class="achievement-reward">+100 XP | +50 COINS</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="achievement-card">
+                <div class="achievement-icon">🎨</div>
+                <div class="achievement-name">UI DESIGNER</div>
+                <div class="achievement-description">Master the art of user interface design</div>
+                <div class="achievement-reward">+150 XP | +75 COINS</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 85%;"></div>
+                </div>
+            </div>
+
+            <div class="achievement-card">
+                <div class="achievement-icon">💻</div>
+                <div class="achievement-name">FULL STACK DEV</div>
+                <div class="achievement-description">Complete a full-stack development project</div>
+                <div class="achievement-reward">+200 XP | +100 COINS</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 60%;"></div>
+                </div>
+            </div>
+
+            <div class="achievement-card">
+                <div class="achievement-icon">🔧</div>
+                <div class="achievement-name">SYSTEM ARCHITECT</div>
+                <div class="achievement-description">Design and implement a complex system</div>
+                <div class="achievement-reward">+250 XP | +150 COINS</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 40%;"></div>
+                </div>
+            </div>
+
+            <div class="achievement-card locked-achievement">
+                <div class="achievement-icon">🚀</div>
+                <div class="achievement-name">LAUNCH PRODUCT</div>
+                <div class="achievement-description">Successfully launch a product to market</div>
+                <div class="achievement-reward">+300 XP | +200 COINS</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="achievement-card locked-achievement">
+                <div class="achievement-icon">⭐</div>
+                <div class="achievement-name">LEGENDARY STATUS</div>
+                <div class="achievement-description">Reach the highest level of mastery</div>
+                <div class="achievement-reward">+500 XP | +300 COINS</div>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-tabs" style="margin-top: 60px;">
+            <a href="{% url 'dashboard' %}" class="nav-tab">BEGINNING</a>
+            <a href="{% url 'logs' %}" class="nav-tab">LOGS</a>
+            <a href="{% url 'achievements' %}" class="nav-tab active">ACHIEVEMENTS</a>
+            <a href="{% url 'creations' %}" class="nav-tab">CREATIONS</a>
+        </div>
+    </div>
+
+    <div class="settings-panel">
+        <div class="setting-btn active" id="sound-fx" title="Sound Effects">🔊</div>
+        <div class="setting-btn" id="music" title="Music">🎵</div>
+        <div class="setting-btn" id="visual-settings" title="Visual Settings">⚙️</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
+</body>
+</html>

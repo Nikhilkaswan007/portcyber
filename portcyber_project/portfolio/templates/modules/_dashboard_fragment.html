@@ -1,0 +1,64 @@
+<div class="hero-section">
+    <div class="hero-text">
+        WELCOME TO THE DIGITAL OPERATIONS CONSOLE<br>
+        A SYSTEM DESIGNED TO SHOWCASE SKILLS, PROJECTS, AND ACHIEVEMENTS<br>
+        <span style="font-size: 9px; color: #666;">BUILT WITH DJANGO + CYBERPUNK AESTHETIC</span>
+    </div>
+    <div class="whale-container">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+        <img src="https://via.placeholder.com/1000x562/001428/ff3366?text=DIGITAL+OPERATIONS" alt="Operations">
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <div class="section-header">
+        <div class="section-title">QUICK STATUS REPORT</div>
+        <div class="section-status">STATUS: ONLINE</div>
+    </div>
+    <div class="status-grid">
+        <div class="status-card">
+            <div class="status-icon">🚀</div>
+            <div class="status-label">PROJECTS ACTIVE</div>
+            <div class="status-value">3</div>
+        </div>
+        <div class="status-card">
+            <div class="status-icon">💻</div>
+            <div class="status-label">MODULES ONLINE</div>
+            <div class="status-value">6</div>
+        </div>
+        <div class="status-card">
+            <div class="status-icon">📈</div>
+            <div class="status-label">PERFORMANCE INDEX</div>
+            <div class="status-value">98.7%</div>
+        </div>
+        <div class="status-card">
+            <div class="status-icon">🔒</div>
+            <div class="status-label">SECURITY PROTOCOLS</div>
+            <div class="status-value">ACTIVE</div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <div class="section-header">
+        <div class="section-title">RECENT SYSTEM ACTIVITY</div>
+        <div class="section-status">LAST UPDATE: {{ server_time|default:"--:--" }}</div>
+    </div>
+    <div class="activity-log">
+        <div class="log-item">
+            <span class="log-timestamp">[01/17/2026 14:30]</span> <span class="log-event">ACCESS GRANTED:</span> <span class="log-detail">SYSTEM SHELL INITIALIZED</span>
+        </div>
+        <div class="log-item">
+            <span class="log-timestamp">[01/17/2026 14:28]</span> <span class="log-event">MODULE LOAD:</span> <span class="log-detail">CREATIONS_VIEWER_INIT</span>
+        </div>
+        <div class="log-item">
+            <span class="log-timestamp">[01/17/2026 14:25]</span> <span class="log-event">DATA RETRIEVE:</span> <span class="log-detail">LOG_ENTRIES_FETCHED</span>
+        </div>
+        <div class="log-item">
+            <span class="log-timestamp">[01/17/2026 14:20]</span> <span class="log-event">USER INTERACTION:</span> <span class="log-detail">SETTINGS_PROFILE_UPDATE</span>
+        </div>
+    </div>
+</div>

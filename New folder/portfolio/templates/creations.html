@@ -1,0 +1,469 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK - Creations</title>
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <style>
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title h1 {
+            font-size: 14px;
+            color: #000;
+            background: #ff3366;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            display: inline-block;
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+        }
+
+        .creations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .creation-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(255, 51, 102, 0.3);
+            overflow: hidden;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+        }
+
+        .creation-card:hover {
+            border-color: #ff3366;
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.5);
+            transform: translateY(-10px);
+        }
+
+        .creation-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.8), rgba(20, 0, 40, 0.8));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .creation-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+        }
+
+        .creation-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 51, 102, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .creation-card:hover .creation-overlay {
+            opacity: 1;
+        }
+
+        .creation-info {
+            padding: 25px;
+        }
+
+        .creation-category {
+            font-size: 9px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .creation-title {
+            font-size: 13px;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        .creation-description {
+            font-size: 11px;
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .creation-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tech-badge {
+            font-size: 8px;
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid #ff3366;
+            color: #ff3366;
+            padding: 4px 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .creation-footer {
+            padding: 15px 25px;
+            border-top: 1px solid rgba(255, 51, 102, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .creation-status {
+            font-size: 9px;
+            color: #00ff88;
+            text-transform: uppercase;
+        }
+
+        .creation-link {
+            font-size: 9px;
+            color: #ff3366;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #ff3366;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .creation-link:hover {
+            color: #fff;
+            border-bottom: 1px solid #fff;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #ff3366;
+            max-width: 1000px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #ff3366;
+            border: none;
+            color: #000;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: #000;
+            color: #ff3366;
+            box-shadow: 0 0 20px #ff3366;
+        }
+
+        .modal-header {
+            padding: 30px;
+            border-bottom: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .modal-project-name {
+            font-size: 16px;
+            color: #000;
+            background: #ff3366;
+            padding: 8px 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .modal-project-brief {
+            font-size: 13px;
+            color: #ff3366;
+            text-transform: uppercase;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-section {
+            margin-bottom: 30px;
+        }
+
+        .modal-section-title {
+            font-size: 11px;
+            color: #000;
+            background: #ff3366;
+            padding: 5px 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .modal-section-content {
+            font-size: 11px;
+            color: #aaa;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div id="three-background"></div>
+    <div class="scanline"></div>
+
+    <div class="header">
+        <div class="level-info">
+            <div class="level"><span class="level-badge">{{ level }}</span> LEVEL</div>
+            <div class="coins">
+                <span style="margin-right: 5px;">+</span>
+                <span>{{ coins }}</span>
+                <span style="margin-left: 5px; font-size: 12px;">COINS AWARDED</span>
+            </div>
+        </div>
+        <div class="time-info">
+            <div>CREDITS</div>
+            <div>SERVER TIME: <span id="server-time">--:--</span></div>
+            <div>LOCAL TIME: <span id="local-time">--:--</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="profile-img">
+            <img src="https://via.placeholder.com/150/ff3366/000000?text=NK" alt="Profile">
+        </div>
+        <div class="profile-info">
+            <div class="profile-name">{{ profile_name }}</div>
+            <div class="profile-title">{{ profile_title }}</div>
+            <div class="profile-company">Legacy.ai</div>
+            <div class="profile-status">
+                <div class="status-icon"></div>
+                <span>OPEN FOR HIRE</span>
+            </div>
+        </div>
+        <a href="#" class="social-btn">
+            <span>🔗</span>
+            <span>OPEN CONNECTION</span>
+        </a>
+        <div class="motto">
+            BUILDING DIGITAL<br>
+            EXPERIENCES THAT<br>
+            INSPIRE.
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-title">
+            <h1>CREATIONS & PROJECTS</h1>
+        </div>
+
+        <div class="creations-grid">
+            <div class="creation-card">
+                <div class="creation-image">
+                    <span>🎨</span>
+                    <div class="creation-overlay">VIEW PROJECT</div>
+                </div>
+                <div class="creation-info">
+                    <div class="creation-category">Web Development</div>
+                    <div class="creation-title">Digital Operations Console</div>
+                    <div class="creation-description">A cyberpunk-themed portfolio system built with Django and Three.js featuring an interactive HUD interface.</div>
+                    <div class="creation-tech">
+                        <div class="tech-badge">Django</div>
+                        <div class="tech-badge">Three.js</div>
+                        <div class="tech-badge">CSS3</div>
+                        <div class="tech-badge">HTML5</div>
+                    </div>
+                </div>
+                <div class="creation-footer">
+                    <div class="creation-status">✓ ACTIVE</div>
+                    <a class="creation-link">Explore</a>
+                </div>
+            </div>
+
+            <div class="creation-card">
+                <div class="creation-image">
+                    <span>💻</span>
+                    <div class="creation-overlay">VIEW PROJECT</div>
+                </div>
+                <div class="creation-info">
+                    <div class="creation-category">Web Development</div>
+                    <div class="creation-title">React Dashboard</div>
+                    <div class="creation-description">A responsive dashboard application with real-time data visualization and interactive components.</div>
+                    <div class="creation-tech">
+                        <div class="tech-badge">React</div>
+                        <div class="tech-badge">Redux</div>
+                        <div class="tech-badge">D3.js</div>
+                        <div class="tech-badge">Node.js</div>
+                    </div>
+                </div>
+                <div class="creation-footer">
+                    <div class="creation-status">✓ COMPLETED</div>
+                    <a class="creation-link">Explore</a>
+                </div>
+            </div>
+
+            <div class="creation-card">
+                <div class="creation-image">
+                    <span>🎮</span>
+                    <div class="creation-overlay">VIEW PROJECT</div>
+                </div>
+                <div class="creation-info">
+                    <div class="creation-category">Game Development</div>
+                    <div class="creation-title">Cyberpunk Game Engine</div>
+                    <div class="creation-description">An experimental game engine prototype exploring procedural generation and real-time rendering.</div>
+                    <div class="creation-tech">
+                        <div class="tech-badge">Three.js</div>
+                        <div class="tech-badge">WebGL</div>
+                        <div class="tech-badge">JavaScript</div>
+                        <div class="tech-badge">Shaders</div>
+                    </div>
+                </div>
+                <div class="creation-footer">
+                    <div class="creation-status">✓ IN PROGRESS</div>
+                    <a class="creation-link">Explore</a>
+                </div>
+            </div>
+
+            <div class="creation-card">
+                <div class="creation-image">
+                    <span>📱</span>
+                    <div class="creation-overlay">VIEW PROJECT</div>
+                </div>
+                <div class="creation-info">
+                    <div class="creation-category">Mobile Development</div>
+                    <div class="creation-title">Cross-Platform App</div>
+                    <div class="creation-description">A mobile application delivering real-time content synchronization across web and native platforms.</div>
+                    <div class="creation-tech">
+                        <div class="tech-badge">React Native</div>
+                        <div class="tech-badge">Firebase</div>
+                        <div class="tech-badge">Redux</div>
+                        <div class="tech-badge">REST API</div>
+                    </div>
+                </div>
+                <div class="creation-footer">
+                    <div class="creation-status">✓ COMPLETED</div>
+                    <a class="creation-link">Explore</a>
+                </div>
+            </div>
+
+            <div class="creation-card">
+                <div class="creation-image">
+                    <span>🔐</span>
+                    <div class="creation-overlay">VIEW PROJECT</div>
+                </div>
+                <div class="creation-info">
+                    <div class="creation-category">Backend Development</div>
+                    <div class="creation-title">API Authentication System</div>
+                    <div class="creation-description">A secure JWT-based authentication system with role-based access control and token management.</div>
+                    <div class="creation-tech">
+                        <div class="tech-badge">Node.js</div>
+                        <div class="tech-badge">JWT</div>
+                        <div class="tech-badge">PostgreSQL</div>
+                        <div class="tech-badge">Express</div>
+                    </div>
+                </div>
+                <div class="creation-footer">
+                    <div class="creation-status">✓ DEPLOYED</div>
+                    <a class="creation-link">Explore</a>
+                </div>
+            </div>
+
+            <div class="creation-card">
+                <div class="creation-image">
+                    <span>🎬</span>
+                    <div class="creation-overlay">VIEW PROJECT</div>
+                </div>
+                <div class="creation-info">
+                    <div class="creation-category">Video & Design</div>
+                    <div class="creation-title">Motion Graphics Suite</div>
+                    <div class="creation-description">A collection of animated graphics and video assets designed for modern digital marketing campaigns.</div>
+                    <div class="creation-tech">
+                        <div class="tech-badge">After Effects</div>
+                        <div class="tech-badge">Cinema 4D</div>
+                        <div class="tech-badge">Blender</div>
+                        <div class="tech-badge">Figma</div>
+                    </div>
+                </div>
+                <div class="creation-footer">
+                    <div class="creation-status">✓ ACTIVE</div>
+                    <a class="creation-link">Explore</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-tabs" style="margin-top: 60px;">
+            <a href="{% url 'dashboard' %}" class="nav-tab">BEGINNING</a>
+            <a href="{% url 'logs' %}" class="nav-tab">LOGS</a>
+            <a href="{% url 'achievements' %}" class="nav-tab">ACHIEVEMENTS</a>
+            <a href="{% url 'creations' %}" class="nav-tab active">CREATIONS</a>
+        </div>
+    </div>
+
+    <div class="settings-panel">
+        <div class="setting-btn active" id="sound-fx" title="Sound Effects">🔊</div>
+        <div class="setting-btn" id="music" title="Music">🎵</div>
+        <div class="setting-btn" id="visual-settings" title="Visual Settings">⚙️</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
+</body>
+</html>

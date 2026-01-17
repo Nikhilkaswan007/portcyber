@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NK - System Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        #three-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .level {
+            font-size: 24px;
+            color: #00ff88;
+        }
+
+        .level-badge {
+            background: rgba(255, 51, 102, 0.2);
+            padding: 5px 10px;
+            border: 1px solid #ff3366;
+            border-radius: 3px;
+        }
+
+        .coins {
+            font-size: 20px;
+            color: #ffd700;
+        }
+
+        .time-info {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: right;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 220px;
+            height: calc(100vh - 80px);
+            background: rgba(0, 0, 0, 0.8);
+            border-right: 1px solid rgba(255, 51, 102, 0.3);
+            padding: 30px 0;
+            z-index: 99;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            border: 3px solid #ff3366;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+        }
+
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-img::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 51, 102, 0.4), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .profile-info {
+            text-align: center;
+            padding: 0 20px;
+            margin-bottom: 30px;
+        }
+
+        .profile-name {
+            font-size: 16px;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .profile-title {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .profile-company {
+            font-size: 10px;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-status {
+            margin-top: 15px;
+            padding: 8px;
+            background: rgba(255, 51, 102, 0.2);
+            border: 1px solid #ff3366;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status-icon {
+            width: 8px;
+            height: 8px;
+            background: #ff3366;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 5px #ff3366; }
+            50% { opacity: 0.5; box-shadow: 0 0 10px #ff3366; }
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            margin: 20px;
+            background: transparent;
+            border: 1px solid #ff3366;
+            color: #ff3366;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .social-btn:hover {
+            background: #ff3366;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
+        }
+
+        .motto {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+            text-transform: uppercase;
+            line-height: 1.5;
+        }
+
+        .main-content {
+            margin-left: 220px;
+            margin-top: 80px;
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+            min-height: calc(100vh - 80px);
+        }
+
+        .hero-section {
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .hero-text {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.8;
+        }
+
+        .whale-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            aspect-ratio: 16/9;
+            border: 2px solid rgba(255, 51, 102, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.8), rgba(20, 0, 40, 0.8));
+        }
+
+        .whale-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+        }
+
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ff3366;
+        }
+
+        .corner.tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .corner.tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .corner.bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .corner.br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            color: #888;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tab.active {
+            border-color: #ff3366;
+            color: #ff3366;
+            background: rgba(255, 51, 102, 0.1);
+        }
+
+        .nav-tab:hover {
+            border-color: #ff3366;
+            color: #ff3366;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.3);
+        }
+
+        .quest-panel {
+            position: fixed;
+            right: 20px;
+            top: 80px;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            padding: 20px;
+            z-index: 98;
+            backdrop-filter: blur(10px);
+        }
+
+        .quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .quest-title {
+            font-size: 12px;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .quest-close {
+            color: #ff3366;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .quest-content {
+            font-size: 10px;
+            line-height: 1.8;
+        }
+
+        .quest-name {
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .quest-goal {
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        .quest-rewards {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .reward-badge {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid #ff3366;
+            border-radius: 3px;
+        }
+
+        .reward-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .reward-text {
+            font-size: 9px;
+            color: #888;
+        }
+
+        .settings-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 98;
+        }
+
+        .setting-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .setting-btn:hover {
+            border-color: #ff3366;
+            background: rgba(255, 51, 102, 0.1);
+        }
+
+        .setting-btn.active {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .setting-btn.active::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+        }
+
+        @media (max-width: 1400px) {
+            .quest-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .header {
+                padding: 15px 20px;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+        }
+
+        .particle {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: #ff3366;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="three-background"></div>
+    <div class="scanline"></div>
+
+    <div class="header">
+        <div class="level-info">
+            <div class="level"><span class="level-badge">48</span> LEVEL</div>
+            <div class="coins">
+                <span style="margin-right: 5px;">+</span>
+                <span>1,425</span>
+                <span style="margin-left: 5px; font-size: 12px;">COINS AWARDED</span>
+            </div>
+        </div>
+        <div class="time-info">
+            <div>CREDITS</div>
+            <div>SERVER TIME: <span id="server-time">6:52</span></div>
+            <div>LOCAL TIME: <span id="local-time">13:42</span></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="profile-img">
+            <img src="https://via.placeholder.com/150/ff3366/000000?text=NK" alt="Profile">
+        </div>
+        <div class="profile-info">
+            <div class="profile-name">Nikhil Kaswan</div>
+            <div class="profile-title">Web Developer</div>
+            <div class="profile-company">Legacy.ai</div>
+            <div class="profile-status">
+                <div class="status-icon"></div>
+                <span>OPEN FOR HIRE</span>
+            </div>
+        </div>
+        <a href="#" class="social-btn">
+            <span>🔗</span>
+            <span>OPEN CONNECTION</span>
+        </a>
+        <div class="motto">
+            MOTTO:<br>
+            SAEPE OMNIS NEQUE<br>
+            NUMQUAM ACCUSANORE<br>
+            LAUDANTIUM.
+        </div>
+    </div>
+
+    <div class="quest-panel">
+        <div class="quest-header">
+            <div class="quest-title">ACTIVE QUEST</div>
+            <div class="quest-close">✕</div>
+        </div>
+        <div class="quest-content">
+            <div style="font-size: 9px; color: #666; margin-bottom: 10px;">THE REACT SKILL-UP LINE</div>
+            <div class="quest-name">REACT WEBSITE</div>
+            <div class="quest-goal">
+                <strong>GOAL</strong><br>
+                BUILD THIS WEBSITE. IMPLEMENT A FULL REACT WEBSITE WITH MULTIPLE ROUTERS, UI ELEMENTS AND TRICKY STYLING. MAKE IT ALL WORK GREAT!
+            </div>
+            <div class="quest-rewards">
+                <div class="reward-badge">
+                    <div class="reward-icon">🏆</div>
+                    <div class="reward-text">+5</div>
+                </div>
+                <div class="reward-badge">
+                    <div class="reward-icon">💰</div>
+                    <div class="reward-text">+25</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="hero-section">
+            <div class="hero-text">
+                SWIMMING THROUGH A VAST NETWORK OF INTERCONNECTED DEVICES AND<br>
+                SERVERS, SPREADING JOY AND WHIMSY TO USERS ACROSS THE GLOBE<br>
+                <span style="font-size: 9px; color: #666;">ARTWORK GENERATED WITH MIDJOURNEY</span>
+            </div>
+            <div class="whale-container">
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>
+                <div class="corner bl"></div>
+                <div class="corner br"></div>
+                <img src="https://via.placeholder.com/1000x562/001428/ff3366?text=CYBER+WHALE" alt="Cyber Whale">
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <a href="#" class="nav-tab active">BEGINNING</a>
+            <a href="logs.html" class="nav-tab">LOGS</a>
+            <a href="achievements.html" class="nav-tab">ACHIEVEMENTS</a>
+            <a href="creations.html" class="nav-tab">CREATIONS</a>
+            <a href="games.html" class="nav-tab">GAMES</a>
+        </div>
+    </div>
+
+    <div class="settings-panel">
+        <div class="setting-btn active" id="sound-fx" title="Sound Effects">🔊</div>
+        <div class="setting-btn" id="music" title="Music">🎵</div>
+        <div class="setting-btn" id="visual-settings" title="Visual Settings">⚙️</div>
+    </div>
+
+    <script>
+        // Three.js background
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('three-background').appendChild(renderer.domElement);
+
+        // Create particle system
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 100;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            color: 0xff3366,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        // Create grid
+        const gridHelper = new THREE.GridHelper(100, 50, 0xff3366, 0x333333);
+        gridHelper.position.y = -10;
+        scene.add(gridHelper);
+
+        camera.position.z = 30;
+        camera.position.y = 5;
+
+        // Animation
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x = mouseY * 0.1;
+            particlesMesh.rotation.z = mouseX * 0.1;
+
+            camera.position.x = mouseX * 2;
+            camera.position.y = 5 + mouseY * 2;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Update times
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('local-time').textContent = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            document.getElementById('server-time').textContent = new Date(now.getTime() - 7 * 60 * 60 * 1000).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Settings buttons
+        document.querySelectorAll('.setting-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+
+        // Quest panel close
+        document.querySelector('.quest-close').addEventListener('click', function() {
+            document.querySelector('.quest-panel').style.display = 'none';
+        });
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Random glitch effect
+        setInterval(() => {
+            if (Math.random() > 0.95) {
+                document.body.style.transform = `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
+                setTimeout(() => {
+                    document.body.style.transform = 'translate(0, 0)';
+                }, 50);
+            }
+        }, 100);
+    </script>
+</body>
+</html>

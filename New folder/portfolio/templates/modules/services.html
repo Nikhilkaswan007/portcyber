@@ -1,0 +1,111 @@
+<div class="main-content-section">
+    <div class="page-title">
+        <h1>SERVICES & CAPABILITIES</h1>
+    </div>
+
+    <div class="services-container">
+        <div class="service-module">
+            <div class="service-header" onclick="toggleService(this)">
+                <div>
+                    <div class="service-title">Web Development</div>
+                    <div class="service-brief">Frontend & full-stack applications</div>
+                </div>
+                <div class="service-toggle">▶</div>
+            </div>
+            <div class="service-details">
+                <h3>Services Included</h3>
+                <p>Building modern web applications with React, Vue, or vanilla JavaScript. Full-stack development with Django, Node.js, or other backends.</p>
+                <ul class="service-list">
+                    <li>SPA (Single Page Applications)</li>
+                    <li>Progressive Web Apps (PWA)</li>
+                    <li>Full-Stack Web Development</li>
+                    <li>REST API Development</li>
+                    <li>Real-time Applications</li>
+                    <li>Performance Optimization</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="service-module">
+            <div class="service-header" onclick="toggleService(this)">
+                <div>
+                    <div class="service-title">UI/UX Design</div>
+                    <div class="service-brief">Interface design & user experience</div>
+                </div>
+                <div class="service-toggle">▶</div>
+            </div>
+            <div class="service-details">
+                <h3>Design Services</h3>
+                <p>Creating beautiful and functional user interfaces with a focus on user experience and accessibility.</p>
+                <ul class="service-list">
+                    <li>User Interface Design</li>
+                    <li>User Experience Research</li>
+                    <li>Wireframing & Prototyping</li>
+                    <li>Design Systems</li>
+                    <li>Accessibility (WCAG)</li>
+                    <li>Mobile App Design</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="service-module">
+            <div class="service-header" onclick="toggleService(this)">
+                <div>
+                    <div class="service-title">System Architecture</div>
+                    <div class="service-brief">Scalable and maintainable systems</div>
+                </div>
+                <div class="service-toggle">▶</div>
+            </div>
+            <div class="service-details">
+                <h3>Architecture Services</h3>
+                <p>Designing robust systems that scale, using best practices for code organization, performance, and reliability.</p>
+                <ul class="service-list">
+                    <li>System Design & Planning</li>
+                    <li>Microservices Architecture</li>
+                    <li>Database Design</li>
+                    <li>API Architecture</li>
+                    <li>Cloud Infrastructure</li>
+                    <li>Performance Optimization</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="service-module">
+            <div class="service-header" onclick="toggleService(this)">
+                <div>
+                    <div class="service-title">Consulting</div>
+                    <div class="service-brief">Technical guidance and strategy</div>
+                </div>
+                <div class="service-toggle">▶</div>
+            </div>
+            <div class="service-details">
+                <h3>Consulting Services</h3>
+                <p>Helping teams make better technical decisions and improve their development processes.</p>
+                <ul class="service-list">
+                    <li>Technology Selection</li>
+                    <li>Code Review & Optimization</li>
+                    <li>Team Training</li>
+                    <li>Best Practices Guidance</li>
+                    <li>DevOps & Infrastructure</li>
+                    <li>Project Planning</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleService(header) {
+        const module = header.closest('.service-module');
+        const allModules = document.querySelectorAll('.service-module');
+        
+        allModules.forEach(m => {
+            if (m !== module) {
+                m.classList.remove('expanded');
+            }
+        });
+        
+        module.classList.toggle('expanded');
+    }
+    initServicesInteractions();
+</script>

@@ -1,0 +1,77 @@
+{% csrf_token %}
+<div class="main-content-section">
+    <div class="page-title">
+        <h1>INITIATE CONNECTION</h1>
+    </div>
+
+    <div class="connect-container">
+        <form class="connect-form" onsubmit="submitContactForm(event)">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            
+            <div class="form-group">
+                <label class="form-label">NAME</label>
+                <input type="text" name="name" class="form-input" placeholder="YOUR NAME" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">EMAIL</label>
+                <input type="email" name="email" class="form-input" placeholder="YOUR EMAIL" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">MESSAGE</label>
+                <textarea name="message" class="form-textarea" placeholder="YOUR MESSAGE..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="form-button">TRANSMIT</button>
+            </div>
+
+            <div class="form-status"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function submitContactForm(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const button = form.querySelector('.form-button');
+        const statusEl = form.querySelector('.form-status');
+        
+        button.disabled = true;
+        button.textContent = 'SENDING...';
+        
+        const formData = new FormData(form);
+        
+        fetch('/api/submit-contact/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': form.querySelector('input[name="csrfmiddlewaretoken"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                statusEl.textContent = 'MESSAGE TRANSMITTED. RESPONSE INCOMING.';
+                statusEl.classList.add('visible');
+                form.reset();
+                systemFeedback.message('CONTACT_RECEIVED', 'success');
+            } else {
+                systemFeedback.message('TRANSMISSION_FAILED', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            systemFeedback.message('TRANSMISSION_FAILED', 'error');
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.textContent = 'TRANSMIT';
+        });
+    }
+    
+    initConnectInteractions();
+</script>

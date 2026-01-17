@@ -1,0 +1,44 @@
+{% load static %}
+<div class="main-content-section service-detail-page">
+    <div class="page-title">
+        <h1>{{ service.title|upper }} // DETAILS</h1>
+    </div>
+
+    <div class="service-detail-container">
+        <div class="service-detail-header">
+            <h3 class="service-codename">{{ service.codename|default:"UNSPECIFIED" }} // {{ service.status|upper }}</h3>
+            <button class="back-to-services-btn" onclick="loadModule('services')">✕ CLOSE</button>
+        </div>
+
+        <div class="service-detail-visual">
+            <img src="{{ service.image }}" alt="{{ service.title }} Visual">
+        </div>
+
+        <div class="service-detail-terminal">
+            <h4 class="terminal-section-title">Description:</h4>
+            <p class="terminal-text">{{ service.description }}</p>
+
+            <h4 class="terminal-section-title">Capabilities:</h4>
+            <ul class="terminal-list">
+                {% for feature in service.features %}
+                    <li>{{ feature }}</li>
+                {% endfor %}
+            </ul>
+
+            <h4 class="terminal-section-title">Use Cases:</h4>
+            <p class="terminal-text">{{ service.usecases }}</p>
+
+            <h4 class="terminal-section-title">Outcome:</h4>
+            <p class="terminal-text">{{ service.outcome }}</p>
+
+            {% if service.gallery %}
+            <h4 class="terminal-section-title">Gallery:</h4>
+            <div class="service-gallery">
+                {% for img_url in service.gallery %}
+                    <img src="{{ img_url }}" alt="{{ service.title }} Gallery Image" class="gallery-image">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

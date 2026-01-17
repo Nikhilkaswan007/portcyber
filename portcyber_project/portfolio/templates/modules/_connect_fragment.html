@@ -1,0 +1,44 @@
+{% csrf_token %}
+<div class="main-content-section">
+    <div class="page-title">
+        <h1>INITIATE CONNECTION</h1>
+    </div>
+
+    <div class="connect-container">
+        <div class="connect-intro">
+            <p class="intro-text">
+                IN THIS REALITY, CONNECTIONS ARE THE LIFEBLOOD OF OPERATION.
+                TRANSMIT YOUR IDENTIFICATION AND INTENTION TO THE SYSTEM.
+                YOUR MESSAGE WILL BE PROCESSED BY NEURAL INTERFACE PROTOCOLS.
+            </p>
+            <p class="intro-warning">
+                BE ADVISED: UNAUTHORIZED DATA PACKETS WILL BE FLAGGED.
+            </p>
+        </div>
+
+        <form class="connect-form">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            
+            <div class="form-group">
+                <label class="form-label">IDENTIFIER [NAME]</label>
+                <input type="text" name="name" class="form-input" placeholder="YOUR NAME / HANDLE" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">ACCESS POINT [EMAIL]</label>
+                <input type="email" name="email" class="form-input" placeholder="YOUR EMAIL / COMM-ID" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">MESSAGE [DATA PACKET]</label>
+                <textarea name="message" class="form-textarea" placeholder="YOUR MESSAGE / INTENTION..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="form-button">TRANSMIT</button>
+            </div>
+
+            <div class="form-status"></div>
+        </form>
+    </div>
+</div>
