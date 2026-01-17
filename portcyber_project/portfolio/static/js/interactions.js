@@ -52,8 +52,8 @@ function updateCreationViewer() {
                 </div>
             </div>
             <div class="viewer-nav">
-                <button onclick="previousCreation()" ${currentCreationIndex === 0 ? 'disabled' : ''}>← PREV</button>
-                <button onclick="nextCreation()" ${currentCreationIndex === creationItems.length - 1 ? 'disabled' : ''}>NEXT →</button>
+                <button onclick="previousCreation()">← PREV</button>
+                <button onclick="nextCreation()">NEXT →</button>
             </div>
             <div style="font-size: 9px; color: #666; text-align: center; margin-top: 10px;">
                 ${currentCreationIndex + 1} / ${creationItems.length}
@@ -65,17 +65,15 @@ function updateCreationViewer() {
 }
 
 function previousCreation() {
-    if (currentCreationIndex > 0) {
-        currentCreationIndex--;
-        updateCreationViewer();
-    }
+    if (creationItems.length === 0) return;
+    currentCreationIndex = (currentCreationIndex - 1 + creationItems.length) % creationItems.length;
+    updateCreationViewer();
 }
 
 function nextCreation() {
-    if (currentCreationIndex < creationItems.length - 1) {
-        currentCreationIndex++;
-        updateCreationViewer();
-    }
+    if (creationItems.length === 0) return;
+    currentCreationIndex = (currentCreationIndex + 1) % creationItems.length;
+    updateCreationViewer();
 }
 
 function closeViewer() {

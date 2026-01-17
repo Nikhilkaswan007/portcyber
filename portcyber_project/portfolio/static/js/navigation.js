@@ -40,6 +40,9 @@ const navigationConfig = {
     }
 };
 
+// Expose loadModule globally for inline HTML onclick attributes
+window.loadModule = loadModule;
+
 // Modified loadModule to accept an optional ID for detail views
 function loadModule(moduleName, id = null) {
     console.log(`[NAV] loadModule called for: ${moduleName} with ID: ${id}`);
@@ -163,6 +166,11 @@ function loadContent(moduleName, id = null) { // Accept id parameter
 
 function updateNavTabs() {
     const navTabs = document.getElementById('nav-tabs');
+    // Check if navTabs element actually exists
+    if (!navTabs) {
+        console.warn('[NAV] #nav-tabs element not found. Cannot update navigation tabs.');
+        return;
+    }
     const currentModule = window.systemState.getModule();
     
     navTabs.innerHTML = '';
@@ -192,8 +200,11 @@ function initCyberpunkServicesCarousel() {
     const servicePrevBtn = document.getElementById('servicePrev');
     const serviceNextBtn = document.getElementById('serviceNext');
 
-    let currentIndex = 0;
+    let currentIndex = 0; // This will always point to the logical index of the real item
+    let currentVisualIndex = 0; // This will point to the index in serviceWindows array, including clones
     const numClonedItems = 2; // Number of items to clone on each side
+    const transitionDuration = 750; // Milliseconds, must match CSS transition-duration
+    let isAnimating = false; // Flag to prevent rapid clicks during animation
 
     // Helper to get computed gap
     const getServiceGap = () => {
@@ -224,26 +235,26 @@ function initCyberpunkServicesCarousel() {
 
         // Re-get all service windows including clones
         serviceWindows = Array.from(servicesTrack.getElementsByClassName('service-window'));
-        currentIndex = numClonedItems; // Set initial index to the first real item
+        currentIndex = numClonedItems; // Set initial logical index to the first real item
+        currentVisualIndex = numClonedItems; // Set initial visual index to the first real item
     };
 
     const updateCarousel = (smoothTransition = true) => {
         if (serviceWindows.length === 0) return;
 
         const containerWidth = servicesInterface.offsetWidth;
-        const currentActiveService = serviceWindows[currentIndex];
+        const currentVisibleService = serviceWindows[currentVisualIndex]; // This is the visually active item
         
         // Temporarily remove transforms to get accurate width for centering calculation
-        // This is crucial because transforms distort offsetWidth/offsetLeft
-        let originalTransform = currentActiveService.style.transform;
-        currentActiveService.style.transform = 'none'; 
-        const itemWidth = currentActiveService.offsetWidth;
-        currentActiveService.style.transform = originalTransform; // Restore
+        let originalTransform = currentVisibleService.style.transform;
+        currentVisibleService.style.transform = 'none'; 
+        const itemWidth = currentVisibleService.offsetWidth;
+        currentVisibleService.style.transform = originalTransform; // Restore
 
-        const itemOffsetLeft = currentActiveService.offsetLeft;
+        const itemOffsetLeft = currentVisibleService.offsetLeft;
         const scrollLeft = itemOffsetLeft - (containerWidth - itemWidth) / 2;
 
-        servicesTrack.style.transition = smoothTransition ? `transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)` : `none`;
+        servicesTrack.style.transition = smoothTransition ? `transform ${transitionDuration / 1000}s cubic-bezier(0.22, 1, 0.36, 1)` : `none`;
         servicesTrack.style.transform = `translateX(-${scrollLeft}px)`;
 
         serviceWindows.forEach((window, i) => {
@@ -258,47 +269,66 @@ function initCyberpunkServicesCarousel() {
                 viewFullDetailsButton.removeEventListener('click', handleViewDetailsClickWrapper); 
             }
 
-            if (i === currentIndex) {
+            // Apply active, prev, next classes based on currentVisualIndex
+            if (i === currentVisualIndex) {
                 window.classList.add('active');
-            } else if (i === currentIndex - 1) { // Direct previous
+            } else if (i === currentVisualIndex - 1) { // Direct previous
                 window.classList.add('prev');
-            } else if (i === currentIndex + 1) { // Direct next
+            } else if (i === currentVisualIndex + 1) { // Direct next
                 window.classList.add('next');
             }
             
-            // Re-attach event listeners only for real items (not clones, or if cloning causes issues)
+            // Re-attach event listeners only for real items (not clones)
             if (!window.classList.contains('is-clone')) {
                 if (visualArea) visualArea.addEventListener('click', handleViewDetailsClickWrapper);
                 if (viewFullDetailsButton) viewFullDetailsButton.addEventListener('click', handleViewDetailsClickWrapper);
             }
         });
-        
-        // Handle cloning for infinite loop effect (snap back)
-        if (currentIndex < numClonedItems || currentIndex >= serviceWindows.length - numClonedItems) {
-            const realItemsCount = serviceWindows.length - (2 * numClonedItems);
-            
-            const transitionHandler = () => {
-                servicesTrack.removeEventListener('transitionend', transitionHandler); // Clean up
-                if (currentIndex < numClonedItems) {
-                    currentIndex = realItemsCount + currentIndex;
-                } else { // currentIndex >= serviceWindows.length - numClonedItems
-                    currentIndex = currentIndex - realItemsCount;
-                }
-                updateCarousel(false); // Snap without transition
-            };
-            
-            if (smoothTransition) {
-                servicesTrack.addEventListener('transitionend', transitionHandler);
-            } else {
-                // If not a smooth transition, just snap immediately
-                transitionHandler();
-            }
-        }
+        isAnimating = false; // Animation complete
     };
 
     const navigate = (direction) => {
-        currentIndex += direction;
-        updateCarousel();
+        if (isAnimating) return; // Prevent navigation if already animating
+        isAnimating = true;
+
+        servicePrevBtn.disabled = true;
+        serviceNextBtn.disabled = true;
+        
+        const realItemsCount = serviceWindows.length - (2 * numClonedItems);
+        let newVisualIndex = currentVisualIndex + direction;
+
+        // Determine if we need to snap after this move
+        let needsSnap = false;
+        let snapToLogicalIndex = 0; // This will be the index of the real item after snap
+
+        if (newVisualIndex < numClonedItems) { // Moving left into cloned leading items
+            needsSnap = true;
+            snapToLogicalIndex = realItemsCount - (numClonedItems - newVisualIndex); // Equivalent real item at the end
+        } else if (newVisualIndex >= serviceWindows.length - numClonedItems) { // Moving right into cloned trailing items
+            needsSnap = true;
+            snapToLogicalIndex = newVisualIndex - (serviceWindows.length - numClonedItems); // Equivalent real item at the start
+        }
+        
+        currentVisualIndex = newVisualIndex; // Update visual index for smooth transition
+        updateCarousel(true); // Animate to the new visual index
+
+        if (needsSnap) {
+            setTimeout(() => {
+                currentVisualIndex = snapToLogicalIndex + numClonedItems; // Adjust visual index to new snapped position
+                currentIndex = snapToLogicalIndex; // Update logical index
+                updateCarousel(false); // Snap instantly
+                // Re-enable buttons after snap
+                servicePrevBtn.disabled = false;
+                serviceNextBtn.disabled = false;
+            }, transitionDuration);
+        } else {
+            // No snap needed, re-enable buttons after normal animation duration
+            setTimeout(() => {
+                servicePrevBtn.disabled = false;
+                serviceNextBtn.disabled = false;
+            }, transitionDuration);
+            currentIndex = newVisualIndex - numClonedItems; // Update logical index for non-cloned items
+        }
     };
 
     const handleViewDetailsClickWrapper = (event) => {
@@ -334,26 +364,26 @@ function initializeModuleInteractions(moduleName) {
     try {
         switch (moduleName) {
             case 'creations':
-                initCreationsInteractions();
+                if (typeof initCreationsInteractions === 'function') initCreationsInteractions();
                 break;
             case 'logs':
-                initLogsInteractions();
+                if (typeof initLogsInteractions === 'function') initLogsInteractions();
                 break;
             case 'services':
-                initCyberpunkServicesCarousel(); // Corrected call
+                if (typeof initCyberpunkServicesCarousel === 'function') initCyberpunkServicesCarousel(); // Corrected call
                 break;
             case 'service_detail': // NEW CASE FOR SERVICE DETAIL PAGE
                 // No specific JS interaction for service detail, just rendering
                 // But we might want to check if the back button needs listeners (it has onclick="loadModule('services')")
                 break;
             case 'connect':
-                initConnectInteractions();
+                if (typeof initConnectInteractions === 'function') initConnectInteractions();
                 break;
             case 'achievements':
-                initAchievementsInteractions();
+                if (typeof initAchievementsInteractions === 'function') initAchievementsInteractions();
                 break;
             case 'dashboard': // Explicitly added dashboard for completeness
-                initDashboardInteractions();
+                if (typeof initDashboardInteractions === 'function') initDashboardInteractions();
                 break;
             default:
                 console.warn(`No specific interaction handler for module: ${moduleName}. Falling back to general interactions.`);

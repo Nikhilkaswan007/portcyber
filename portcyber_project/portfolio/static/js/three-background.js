@@ -45,27 +45,40 @@ function initThreeBackground() {
     camera.position.z = 30;
     camera.position.y = 5;
 
-    // Mouse tracking
+    // Mouse tracking with smoothing
     let mouseX = 0;
     let mouseY = 0;
+    let targetRotationX = 0;
+    let targetRotationZ = 0;
+    let currentRotationX = 0;
+    let currentRotationZ = 0;
 
     document.addEventListener('mousemove', (e) => {
         mouseX = (e.clientX / window.innerWidth) * 2 - 1;
         mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
     });
 
-    // Animation loop
+    // Animation loop with smooth interpolation
     function animate() {
         requestAnimationFrame(animate);
 
         const motionFactor = window.systemState.settings.motionLevel / 100;
+        const smoothing = 0.1; // Smoothing factor for interpolation
+        
+        // Smooth rotation towards target
+        targetRotationX = mouseY * 0.3 * motionFactor;
+        targetRotationZ = mouseX * 0.3 * motionFactor;
+        
+        currentRotationX += (targetRotationX - currentRotationX) * smoothing;
+        currentRotationZ += (targetRotationZ - currentRotationZ) * smoothing;
         
         particlesMesh.rotation.y += 0.001 * motionFactor;
-        particlesMesh.rotation.x = mouseY * 0.1 * motionFactor;
-        particlesMesh.rotation.z = mouseX * 0.1 * motionFactor;
+        particlesMesh.rotation.x = currentRotationX;
+        particlesMesh.rotation.z = currentRotationZ;
 
-        camera.position.x = mouseX * 2 * motionFactor;
-        camera.position.y = 5 + mouseY * 2 * motionFactor;
+        // Smooth camera movement
+        camera.position.x += (mouseX * 2 * motionFactor - camera.position.x) * smoothing;
+        camera.position.y += (5 + mouseY * 2 * motionFactor - camera.position.y) * smoothing;
 
         renderer.render(scene, camera);
     }

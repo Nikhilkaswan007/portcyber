@@ -22,48 +22,62 @@ function initCyberpunkServicesCarousel() {
         const serviceWidth = serviceWindows[0] ? serviceWindows[0].offsetWidth : 0;
         const gap = getServiceGap();
 
-        // Determine the shift required to place the `currentIndex` service window approximately "in view" at the left edge.
-        // This value needs to consider potential variable widths of service-window elements due to CSS transforms.
-        const currentActiveService = serviceWindows[currentIndex];
-        const activeOffsetLeft = currentActiveService ? currentActiveService.offsetLeft : 0;
+        // Calculate position based on currentIndex
+        const shift = currentIndex * (serviceWidth + gap);
         
-        // Adjust track's position to bring the active card into the starting position
-        // For a seamless carousel, we need to clone elements or implement more complex logic.
-        // For now, let's just shift the track by the offset of the currently active element.
-        servicesTrack.style.transform = `translateX(-${activeOffsetLeft}px)`;
+        // Step 1: Disable transitions on all windows
+        serviceWindows.forEach(window => {
+            window.style.transition = 'none';
+        });
 
-
-        serviceWindows.forEach((window, i) => {
-            window.classList.remove('active', 'prev', 'next', 'expanded');
-            
-            // Remove all click listeners before re-adding to prevent duplicates
-            window.removeEventListener('click', handleServiceClick);
-            window.querySelector('.service-visual-area').removeEventListener('click', handleServiceClick);
-            const viewFullDetailsButton = window.querySelector('.view-full-details-btn');
-            if (viewFullDetailsButton) {
-                viewFullDetailsButton.removeEventListener('click', openDeepDiveModal);
-            }
-
-            if (i === currentIndex) {
-                window.classList.add('active');
-                // Attach click listener only to the visual area for the first click (expand preview)
-                window.querySelector('.service-visual-area').addEventListener('click', handleServiceClick);
-                if (expandedService === window) {
-                    window.classList.add('expanded'); // Re-add expanded if it was previously expanded
-                    populateExpandedPreview(window);
+        // Step 2: Use requestAnimationFrame to ensure styles are applied, then update classes
+        requestAnimationFrame(() => {
+            // Now update window classes while transitions are disabled
+            serviceWindows.forEach((window, i) => {
+                // Remove all classes first
+                window.classList.remove('active', 'prev', 'next', 'expanded');
+                
+                // Remove all click listeners before re-adding to prevent duplicates
+                window.removeEventListener('click', handleServiceClick);
+                const visualArea = window.querySelector('.service-visual-area');
+                if (visualArea) {
+                    visualArea.removeEventListener('click', handleServiceClick);
                 }
-            } else {
-                if (i === (currentIndex - 1 + serviceWindows.length) % serviceWindows.length) {
+                const viewFullDetailsButton = window.querySelector('.view-full-details-btn');
+                if (viewFullDetailsButton) {
+                    viewFullDetailsButton.removeEventListener('click', openDeepDiveModal);
+                }
+
+                // Add appropriate class based on position
+                if (i === currentIndex) {
+                    window.classList.add('active');
+                    if (visualArea) {
+                        visualArea.addEventListener('click', handleServiceClick);
+                    }
+                    if (expandedService === window) {
+                        window.classList.add('expanded');
+                        populateExpandedPreview(window);
+                    }
+                } else if (i === (currentIndex - 1 + serviceWindows.length) % serviceWindows.length) {
                     window.classList.add('prev');
                 } else if (i === (currentIndex + 1) % serviceWindows.length) {
                     window.classList.add('next');
                 }
-                // For inactive windows, ensure they are not "expanded" visually
-                window.classList.remove('expanded');
-            }
+            });
+
+            // Step 3: Another requestAnimationFrame to re-enable transitions
+            requestAnimationFrame(() => {
+                serviceWindows.forEach(window => {
+                    window.style.transition = '';
+                });
+
+                // Step 4: Now apply the track transform with transition
+                servicesTrack.style.transition = 'transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)';
+                servicesTrack.style.transform = `translateX(-${shift}px)`;
+            });
         });
 
-        // Ensure nav buttons are visible, they might have been hidden by expanded preview
+        // Ensure nav buttons are visible
         if (!expandedService) {
             servicePrevBtn.style.display = 'block';
             serviceNextBtn.style.display = 'block';

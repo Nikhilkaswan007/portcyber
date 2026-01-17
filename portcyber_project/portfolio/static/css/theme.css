@@ -6,13 +6,24 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 body {
     font-family: 'Courier New', monospace;
     background: #000;
     color: #fff;
-    overflow-x: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
 }
 
 /* ========================================
@@ -292,7 +303,9 @@ body {
     padding: 40px;
     position: relative;
     z-index: 1;
-    min-height: auto;
+    height: 100vh;
+    overflow-y: auto;
+    padding-bottom: 100px; /* Add padding to prevent nav overlap */
 }
 
 .hero-section {
@@ -1803,39 +1816,40 @@ body {
     will-change: transform;
 }
 
-/* SERVICE WINDOW */
+/* SERVICE WINDOW - BASE STATE (NO TRANSITION) */
 .service-window {
     flex: 0 0 70%;
     position: relative;
     transform-origin: center;
-    transform: scale(0.78) rotateY(18deg);
     opacity: 0.35;
     filter: blur(1px);
-    transition:
-        transform 0.6s ease,
-        opacity 0.6s ease,
-        filter 0.6s ease,
-        box-shadow 0.6s ease;
     cursor: pointer;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: scale(0.78) rotateY(18deg);
 }
 
-/* ACTIVE (CENTER) */
+/* ACTIVE (CENTER) - SMOOTH TRANSITION IN */
 .service-window.active {
     transform: scale(1) rotateY(0deg);
     opacity: 1;
     filter: none;
     z-index: 5;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* LEFT / RIGHT PREVIEWS */
+/* PREV (LEFT) - SMOOTH TRANSITION IN */
 .service-window.prev {
     transform: scale(0.85) rotateY(-18deg);
     opacity: 0.6;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* NEXT (RIGHT) - SMOOTH TRANSITION IN */
 .service-window.next {
     transform: scale(0.85) rotateY(18deg);
     opacity: 0.6;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* EXPANDED PREVIEW (FIRST CLICK) */
