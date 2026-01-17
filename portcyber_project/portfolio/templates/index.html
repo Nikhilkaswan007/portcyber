@@ -43,7 +43,7 @@
                 </div>
             </div>
             <div class="header-controls">
-                <div class="setting-btn mobile-profile-btn" id="mobile-profile-btn" title="Profile" onclick="openMobileProfileModal()" style="display: none;">👤</div>
+                <div class="setting-btn mobile-profile-btn" id="mobile-profile-btn" title="Profile" onclick="loadContent('profile')">👤</div>
                 <div class="nav-tab" id="music-btn" style="cursor: pointer;">Music</div>
             </div>
             <div class="time-info">
@@ -134,31 +134,7 @@
             </div>
         </div>
 
-        <!-- Mobile Profile Modal -->
-        <div class="modal-overlay" id="mobile-profile-modal" style="display: none;">
-            <div class="modal-content mobile-profile-modal-content">
-                <div class="modal-close" onclick="closeMobileProfileModal()">✕</div>
-                <div class="profile-modal-body">
-                    <img src="{% static 'images/profile.png' %}" alt="Profile" class="profile-modal-img">
-                    <div class="profile-modal-name">{{ profile_name }}</div>
-                    <div class="profile-modal-title">{{ profile_title }}</div>
-                    <div class="profile-modal-company">{{ company }}</div>
-                    <div class="profile-modal-status">
-                        <span style="width: 10px; height: 10px; background: #ff3366; border-radius: 50%; animation: pulse 2s infinite;"></span>
-                        <span>OPEN FOR HIRE</span>
-                    </div>
-                    <div class="profile-modal-motto">
-                        CODE IS ART<br>
-                        DESIGN IS FUNCTION<br>
-                        SYSTEMS ARE ALIVE.
-                    </div>
-                    <a href="#" class="social-btn" onclick="systemCommand('connect'); closeMobileProfileModal(); return false;">
-                        <span>🔗</span>
-                        <span>OPEN CONNECTION</span>
-                    </a>
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <!-- Scripts -->

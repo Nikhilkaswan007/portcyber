@@ -144,6 +144,16 @@ class ConnectView(View):
         html_fragment = render_to_string('modules/_connect_fragment.html', request=request)
         return HttpResponse(html_fragment)
 
+class ProfileView(View):
+    def get(self, request):
+        context = {
+            'profile_name': 'Nikhil Kaswan', # This is now static
+            'profile_title': 'Web Developer',
+            'company': 'Legacy.ai',
+        }
+        html_fragment = render_to_string('modules/_profile_fragment.html', context, request=request)
+        return HttpResponse(html_fragment)
+
 @require_http_methods(["GET"])
 def get_site_stats(request):
     site_stats = SiteStats.load()
@@ -153,6 +163,11 @@ def get_site_stats(request):
         'coins': site_stats.coins
     })
 
+from django.views.decorators.csrf import csrf_exempt
+
+# ... (other code)
+
+@csrf_exempt
 @require_http_methods(["POST"])
 def claim_reward(request):
     try:

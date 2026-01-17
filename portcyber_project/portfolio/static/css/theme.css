@@ -119,6 +119,10 @@ body {
     align-items: center;
 }
 
+.mobile-profile-btn {
+    display: none;
+}
+
 .level-info {
     display: flex;
     align-items: center;
@@ -327,6 +331,11 @@ body {
     letter-spacing: 2px;
     line-height: 1.8;
 }
+@media (max-width: 768px){
+    .hero-text {
+        padding-top: 60px;
+    }
+}
 
 .whale-container {
     width: 100%;
@@ -379,6 +388,7 @@ body {
     backdrop-filter: blur(10px);
     width: 100%;
     box-sizing: border-box;
+    padding-left: 250px;
 }
 
 .nav-tab {
@@ -422,7 +432,7 @@ body {
     background: rgba(0, 0, 0, 0.9);
     border: 1px solid rgba(255, 51, 102, 0.3);
     padding: 20px;
-    z-index: 98;
+    z-index: 101;
     backdrop-filter: blur(10px);
 }
 
@@ -1223,7 +1233,7 @@ body {
 .page-title {
     text-align: center;
     margin-bottom: 40px;
-    padding-top: 10px;
+    padding-top: 60px;
 }
 
 .page-title h1 {

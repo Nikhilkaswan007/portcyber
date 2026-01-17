@@ -129,41 +129,26 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeViewer();
-        closeMobileProfileModal();
         closeSettingsPanel();
     }
 });
 
-// ========================================
-// MOBILE PROFILE MODAL
-// ========================================
-
-function openMobileProfileModal() {
-    const modal = document.getElementById('mobile-profile-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
-}
-
-function closeMobileProfileModal() {
-    const modal = document.getElementById('mobile-profile-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
 // Show mobile profile button on mobile devices
 window.addEventListener('load', () => {
     const mobileBtn = document.getElementById('mobile-profile-btn');
-    if (window.innerWidth <= 768 && mobileBtn) {
-        mobileBtn.style.display = 'flex';
+    // Ensure button is hidden by default and only shown on mobile
+    if (mobileBtn) {
+        mobileBtn.style.display = 'none'; // Initially hide
+        if (window.innerWidth <= 768) {
+            mobileBtn.style.display = 'flex'; // Show only on mobile
+        }
     }
 });
 
-// Close modal when clicking outside
+// Close modal when clicking outside - only for viewer modal now
 document.addEventListener('click', (e) => {
-    const modal = document.getElementById('mobile-profile-modal');
-    if (modal && e.target === modal) {
-        closeMobileProfileModal();
+    const viewerModal = document.getElementById('viewer-modal');
+    if (viewerModal && e.target === viewerModal) {
+        closeViewer();
     }
 });

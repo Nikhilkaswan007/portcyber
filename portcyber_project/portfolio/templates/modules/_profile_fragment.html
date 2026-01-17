@@ -1,0 +1,30 @@
+{% load static %}
+<div class="main-content-section">
+    <div class="page-title">
+        <h1>PROFILE OVERVIEW</h1>
+    </div>
+
+    <div class="profile-card-section">
+        <div class="profile-card-container">
+            <img src="{% static 'images/profile.png' %}" alt="Profile" class="profile-card-img">
+            <div class="profile-card-info">
+                <div class="profile-card-name">{{ profile_name }}</div>
+                <div class="profile-card-title">{{ profile_title }}</div>
+                <div class="profile-card-company">{{ company }}</div>
+                <div class="profile-card-status">
+                    <span style="width: 10px; height: 10px; background: #ff3366; border-radius: 50%; animation: pulse 2s infinite;"></span>
+                    <span>OPEN FOR HIRE</span>
+                </div>
+            </div>
+        </div>
+        <div class="profile-card-motto">
+            CODE IS ART<br>
+            DESIGN IS FUNCTION<br>
+            SYSTEMS ARE ALIVE.
+        </div>
+        <a href="#" class="profile-card-connect" onclick="systemCommand('connect'); return false;">
+            <span>🔗</span>
+            <span>OPEN CONNECTION</span>
+        </a>
+    </div>
+</div>

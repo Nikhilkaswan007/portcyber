@@ -37,11 +37,17 @@ const navigationConfig = {
         label: 'CONNECT',
         icon: '🔗',
         path: '/api/content/connect/'
+    },
+    profile: { // New entry for profile page
+        label: 'PROFILE',
+        icon: '👤',
+        path: '/api/content/profile/'
     }
 };
 
 // Expose loadModule globally for inline HTML onclick attributes
 window.loadModule = loadModule;
+window.loadContent = loadContent;
 
 // Modified loadModule to accept an optional ID for detail views
 function loadModule(moduleName, id = null) {
@@ -68,7 +74,7 @@ function loadModule(moduleName, id = null) {
     try {
         // Update navigation tabs - only for main modules, not details
         // Only update nav tabs if we are loading a module that is part of the main navigation
-        if (navigationConfig[moduleName].label !== 'SERVICE_DETAIL') {
+        if (moduleName !== 'profile' && navigationConfig[moduleName].label !== 'SERVICE_DETAIL') {
             updateNavTabs();
         }
         console.log(`[NAV] updateNavTabs executed.`);
@@ -176,8 +182,8 @@ function updateNavTabs() {
     navTabs.innerHTML = '';
     
     Object.entries(navigationConfig).forEach(([key, config]) => {
-        // Only show main navigation items, not detail pages
-        if (config.label !== 'SERVICE_DETAIL') { 
+        // Only show main navigation items, not detail pages, and EXCLUDE 'profile'
+        if (key !== 'profile' && config.label !== 'SERVICE_DETAIL') { 
             const tab = document.createElement('a');
             tab.href = '#';
             tab.className = 'nav-tab' + (key === currentModule ? ' active' : '');

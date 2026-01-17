@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/content/services/', views.ServicesView.as_view(), name='api-services'),
     path('api/content/service/<str:service_id>/', views.ServiceDetailView.as_view(), name='api-service-detail'),
     path('api/content/connect/', views.ConnectView.as_view(), name='api-connect'),
+    path('api/content/profile/', views.ProfileView.as_view(), name='api-profile'),
     
     # Contact form submission API
     path('api/submit-contact/', views.submit_contact, name='api-submit-contact'),

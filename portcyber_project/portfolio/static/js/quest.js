@@ -2,7 +2,7 @@
 // QUEST SYSTEM LOGIC
 // ========================================
 
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const questPanel = document.getElementById('quest-panel');
     const trophyRewardBtn = document.getElementById('claim-trophy-reward');
     const coinRewardBtn = document.getElementById('claim-coin-reward');
