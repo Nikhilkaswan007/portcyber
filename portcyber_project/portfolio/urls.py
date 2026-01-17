@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     # Main routes
-    path('', views.LandingPageView.as_view(), name='index'),
+    path('', views.SystemShellView.as_view(), name='index'),
     path('landing/', views.LandingPageView.as_view(), name='landing'),
     # This will now render the SPA shell (index.html)
     path('dashboard/', views.SystemShellView.as_view(), name='dashboard'), 
@@ -27,4 +27,6 @@ urlpatterns = [
     
     # Contact form submission API
     path('api/submit-contact/', views.submit_contact, name='api-submit-contact'),
+    path('api/claim-reward/', views.claim_reward, name='api-claim-reward'),
+    path('api/site-stats/', views.get_site_stats, name='api-site-stats'),
 ]

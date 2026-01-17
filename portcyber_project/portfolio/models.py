@@ -1,3 +1,29 @@
 from django.db import models
+from django.utils import timezone
 
-# Create your models here.
+class ContactSubmission(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Submission from {self.name} at {self.submitted_at.strftime('%Y-%m-%d %H:%M')}"
+
+class SiteStats(models.Model):
+    level = models.IntegerField(default=1)
+    trophies = models.IntegerField(default=0)
+    coins = models.IntegerField(default=5000)
+    last_daily_reduction_check = models.DateField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super(SiteStats, self).save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    class Meta:
+        verbose_name_plural = "Site Stats"

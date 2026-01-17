@@ -35,6 +35,7 @@
         <div class="header">
             <div class="level-info">
                 <div class="level"><span class="level-badge" id="level-display">{{ level }}</span> LEVEL</div>
+                <div class="trophies"><span id="trophy-display">0</span> / 100 🏆</div>
                 <div class="coins">
                     <span style="margin-right: 5px;">+</span>
                     <span id="coins-display">{{ coins }}</span>
@@ -43,10 +44,7 @@
             </div>
             <div class="header-controls">
                 <div class="setting-btn mobile-profile-btn" id="mobile-profile-btn" title="Profile" onclick="openMobileProfileModal()" style="display: none;">👤</div>
-                <div class="setting-btn" id="sound-fx" title="Sound Effects" onclick="toggleSetting('sound')">🔊</div>
-                <div class="setting-btn" id="music" title="Music" onclick="toggleSetting('music')">🎵</div>
-                <div class="setting-btn" id="visual-settings" title="Visual Settings" onclick="toggleSetting('visuals')">⚙️</div>
-                <div class="setting-btn" id="accessibility" title="Accessibility" onclick="openAccessibilityPanel()">♿</div>
+                <div class="nav-tab" id="music-btn" style="cursor: pointer;">Music</div>
             </div>
             <div class="time-info">
                 <div>CREDITS</div>
@@ -58,7 +56,7 @@
         <!-- Sidebar / Profile Panel -->
         <div class="sidebar">
             <div class="profile-img">
-                <img src="https://via.placeholder.com/150/ff3366/000000?text=NK" alt="Profile">
+                <img src="{% static 'images/profile.png' %}" alt="Profile">
             </div>
             <div class="profile-info">
                 <div class="profile-name">{{ profile_name }}</div>
@@ -111,11 +109,11 @@
                     NAVIGATE THROUGH SECTIONS AND INTERACT WITH THE SYSTEM.
                 </div>
                 <div class="quest-rewards">
-                    <div class="reward-badge">
+                    <div class="reward-badge" id="claim-trophy-reward" style="cursor: pointer;">
                         <div class="reward-icon">🏆</div>
                         <div class="reward-text">+5</div>
                     </div>
-                    <div class="reward-badge">
+                    <div class="reward-badge" id="claim-coin-reward" style="cursor: pointer;">
                         <div class="reward-icon">💰</div>
                         <div class="reward-text">+25</div>
                     </div>
@@ -123,51 +121,10 @@
             </div>
         </div>
 
-
-
-        <!-- Accessibility / Settings Modal -->
-        <div class="modal-overlay" id="accessibility-modal" style="display: none;">
-            <div class="modal-content settings-modal">
-                <div class="modal-close" onclick="closeAccessibilityPanel()">✕</div>
-                <div class="modal-header">
-                    <h2>SYSTEM SETTINGS</h2>
-                </div>
-                <div class="modal-body">
-                    <div class="settings-section">
-                        <label class="setting-label">Visual Intensity</label>
-                        <input type="range" id="visual-intensity" min="0" max="100" value="100" onchange="updateVisualIntensity(this.value)">
-                        <span id="visual-intensity-display">100%</span>
-                    </div>
-                    <div class="settings-section">
-                        <label class="setting-label">Background Motion</label>
-                        <input type="range" id="motion-level" min="0" max="100" value="100" onchange="updateMotionLevel(this.value)">
-                        <span id="motion-level-display">100%</span>
-                    </div>
-                    <div class="settings-section">
-                        <label class="setting-label">Noise/Grain</label>
-                        <input type="range" id="noise-level" min="0" max="100" value="100" onchange="updateNoiseLevel(this.value)">
-                        <span id="noise-level-display">100%</span>
-                    </div>
-                    <div class="settings-section">
-                        <label class="setting-label">Interface Contrast</label>
-                        <input type="range" id="contrast-level" min="50" max="150" value="100" onchange="updateContrast(this.value)">
-                        <span id="contrast-level-display">100%</span>
-                    </div>
-                    <div class="settings-section checkbox">
-                        <label>
-                            <input type="checkbox" id="performance-mode" onchange="togglePerformanceMode()">
-                            Performance Mode (reduce background complexity)
-                        </label>
-                    </div>
-                    <div class="settings-section checkbox">
-                        <label>
-                            <input type="checkbox" id="reduce-motion" onchange="toggleReduceMotion()">
-                            Reduce Motion (accessibility)
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Audio Player -->
+        <audio id="background-music" loop>
+            <source src="{% static 'sound/sound.mp3' %}" type="audio/mpeg">
+        </audio>
 
         <!-- Modal for Viewers (Creations, etc) -->
         <div class="modal-overlay" id="viewer-modal" style="display: none;">
@@ -182,7 +139,7 @@
             <div class="modal-content mobile-profile-modal-content">
                 <div class="modal-close" onclick="closeMobileProfileModal()">✕</div>
                 <div class="profile-modal-body">
-                    <img src="https://via.placeholder.com/200/ff3366/000000?text=NK" alt="Profile" class="profile-modal-img">
+                    <img src="{% static 'images/profile.png' %}" alt="Profile" class="profile-modal-img">
                     <div class="profile-modal-name">{{ profile_name }}</div>
                     <div class="profile-modal-title">{{ profile_title }}</div>
                     <div class="profile-modal-company">{{ company }}</div>
@@ -214,5 +171,7 @@
     <script src="{% static 'js/settings.js' %}"></script>
     <script src="{% static 'js/system-feedback.js' %}"></script>
     <script src="{% static 'js/interactions.js' %}"></script>
+    <script src="{% static 'js/quest.js' %}"></script>
+    <script src="{% static 'js/sound.js' %}"></script>
 </body>
 </html>

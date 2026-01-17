@@ -2,6 +2,15 @@
 // INTERACTIONS & MODAL HANDLERS
 // ========================================
 
+document.addEventListener('DOMContentLoaded', (event) => {
+    // New Settings Panel
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', openSettingsPanel);
+    }
+});
+
+
 let currentCreationIndex = 0;
 let creationItems = [];
 
@@ -90,6 +99,20 @@ function closeQuestPanel() {
     }
 }
 
+function openSettingsPanel() {
+    const modal = document.getElementById('settings-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeSettingsPanel() {
+    const modal = document.getElementById('settings-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
 // Keyboard navigation in viewer
 document.addEventListener('keydown', (e) => {
     const viewerModal = document.getElementById('viewer-modal');
@@ -107,6 +130,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeViewer();
         closeMobileProfileModal();
+        closeSettingsPanel();
     }
 });
 

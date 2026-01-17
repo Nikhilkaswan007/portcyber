@@ -2,8 +2,10 @@ from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
-from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
+from .models import SiteStats, ContactSubmission
+from django.utils import timezone
+import json
 
 # Dummy data for service details (in a real app, this would be from a DB)
 SERVICE_DETAILS = {
@@ -78,10 +80,22 @@ class LandingPageView(View):
 
 class SystemShellView(View):
     def get(self, request):
+        site_stats = SiteStats.load()
+
+        # Daily coin reduction logic
+        today = timezone.now().date()
+        if site_stats.last_daily_reduction_check < today:
+            days_since_last_check = (today - site_stats.last_daily_reduction_check).days
+            reduction = days_since_last_check * 5
+            site_stats.coins = max(0, site_stats.coins - reduction)
+            site_stats.last_daily_reduction_check = today
+            site_stats.save()
+
         context = {
-            'level': 48,
-            'coins': '1,425',
-            'profile_name': 'Nikhil Kaswan',
+            'level': site_stats.level,
+            'trophies': site_stats.trophies,
+            'coins': site_stats.coins,
+            'profile_name': 'Nikhil Kaswan', # This is now static
             'profile_title': 'Web Developer',
             'company': 'Legacy.ai',
         }
@@ -120,7 +134,7 @@ class ServiceDetailView(View):
         
         context = {
             'service': service_data,
-            'service_id': service_id, # Pass service_id to template for back button or further actions
+            'service_id': service_id,
         }
         html_fragment = render_to_string('modules/_service_detail_fragment.html', context, request=request)
         return HttpResponse(html_fragment)
@@ -129,6 +143,42 @@ class ConnectView(View):
     def get(self, request):
         html_fragment = render_to_string('modules/_connect_fragment.html', request=request)
         return HttpResponse(html_fragment)
+
+@require_http_methods(["GET"])
+def get_site_stats(request):
+    site_stats = SiteStats.load()
+    return JsonResponse({
+        'level': site_stats.level,
+        'trophies': site_stats.trophies,
+        'coins': site_stats.coins
+    })
+
+@require_http_methods(["POST"])
+def claim_reward(request):
+    try:
+        data = json.loads(request.body)
+        reward_type = data.get('reward_type')
+        site_stats = SiteStats.load()
+
+        if reward_type == 'trophy':
+            site_stats.trophies += 5
+            if site_stats.trophies >= 100:
+                site_stats.level += 1
+                site_stats.trophies -= 100
+        elif reward_type == 'coin':
+            site_stats.coins += 25
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid reward type'}, status=400)
+        
+        site_stats.save()
+        return JsonResponse({
+            'status': 'success',
+            'level': site_stats.level,
+            'trophies': site_stats.trophies,
+            'coins': site_stats.coins
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 @require_http_methods(["POST"])
 def submit_contact(request):
@@ -141,7 +191,8 @@ def submit_contact(request):
         if not all([name, email, message]):
             return JsonResponse({'status': 'error', 'message': 'Missing fields'}, status=400)
         
-        # TODO: Send email or save to database
+        ContactSubmission.objects.create(name=name, email=email, message=message)
+        
         return JsonResponse({'status': 'success', 'message': 'Message received'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

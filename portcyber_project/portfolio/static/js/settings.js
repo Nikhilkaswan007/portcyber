@@ -29,36 +29,6 @@ function toggleSetting(setting) {
     window.systemState.saveSettings();
 }
 
-function openAccessibilityPanel() {
-    const modal = document.getElementById('accessibility-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        
-        // Load current settings into form
-        document.getElementById('visual-intensity').value = window.systemState.settings.visualIntensity;
-        document.getElementById('visual-intensity-display').textContent = window.systemState.settings.visualIntensity + '%';
-        
-        document.getElementById('motion-level').value = window.systemState.settings.motionLevel;
-        document.getElementById('motion-level-display').textContent = window.systemState.settings.motionLevel + '%';
-        
-        document.getElementById('noise-level').value = window.systemState.settings.noiseLevel;
-        document.getElementById('noise-level-display').textContent = window.systemState.settings.noiseLevel + '%';
-        
-        document.getElementById('contrast-level').value = window.systemState.settings.contrast;
-        document.getElementById('contrast-level-display').textContent = window.systemState.settings.contrast + '%';
-        
-        document.getElementById('performance-mode').checked = window.systemState.settings.performanceMode;
-        document.getElementById('reduce-motion').checked = window.systemState.settings.reduceMotion;
-    }
-}
-
-function closeAccessibilityPanel() {
-    const modal = document.getElementById('accessibility-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
 function updateVisualIntensity(value) {
     document.getElementById('visual-intensity-display').textContent = value + '%';
     window.systemState.updateSetting('visualIntensity', parseInt(value));
@@ -90,25 +60,3 @@ function toggleReduceMotion() {
     window.systemState.updateSetting('reduceMotion', checked);
     systemFeedback.message(`MOTION_REDUCTION_${checked ? 'ENABLED' : 'DISABLED'}`, 'info');
 }
-
-// Close modal on Escape key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeAccessibilityPanel();
-        closeViewer();
-        closeQuestPanel();
-    }
-});
-
-// Close modal on background click
-document.addEventListener('click', (e) => {
-    const modal = document.getElementById('accessibility-modal');
-    if (modal && e.target === modal) {
-        closeAccessibilityPanel();
-    }
-    
-    const viewerModal = document.getElementById('viewer-modal');
-    if (viewerModal && e.target === viewerModal) {
-        closeViewer();
-    }
-});
