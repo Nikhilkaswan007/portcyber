@@ -4,23 +4,28 @@
 
 // Update time display
 function updateTime() {
-    const serverTimeEl = document.getElementById('server-time');
-    const localTimeEl = document.getElementById('local-time');
-    
-    if (!serverTimeEl || !localTimeEl) return;
-
     const now = new Date();
-    localTimeEl.textContent = now.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-    });
-    serverTimeEl.textContent = new Date(now.getTime() - 7 * 60 * 60 * 1000).toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-    });
+    // Assuming these elements exist in your HTML
+    const localTimeEl = document.getElementById('local-time');
+    const serverTimeEl = document.getElementById('server-time');
+
+    if (localTimeEl) {
+        localTimeEl.textContent = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+    if (serverTimeEl) {
+        // Example: Server time is 7 hours behind local time
+        serverTimeEl.textContent = new Date(now.getTime() - 7 * 60 * 60 * 1000).toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
 }
+
 
 // Settings buttons
 function initSettingsButtons() {
@@ -42,7 +47,7 @@ function initQuestPanel() {
 }
 
 // Random glitch effect
-function initGlitchEffect() {
+function initBodyGlitchEffect() {
     setInterval(() => {
         if (Math.random() > 0.95) {
             document.body.style.transform = `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
@@ -53,7 +58,7 @@ function initGlitchEffect() {
     }, 100);
 }
 
-// Landing page logo glitch
+// Landing page logo glitch (from previous version, keeping if still needed)
 function initLandingGlitch() {
     const logo = document.querySelector('.logo');
     if (logo) {
@@ -71,10 +76,9 @@ function initLandingGlitch() {
 // Initialize everything on page load
 document.addEventListener('DOMContentLoaded', () => {
     updateTime();
-    setInterval(updateTime, 1000);
+    setInterval(updateTime, 1000); // Start time update interval
     initSettingsButtons();
     initQuestPanel();
-    initGlitchEffect();
-    initLandingGlitch();
+    initBodyGlitchEffect(); // Activate the body glitch effect
+    initLandingGlitch(); // Keep if landing glitch is still desired
 });
-
