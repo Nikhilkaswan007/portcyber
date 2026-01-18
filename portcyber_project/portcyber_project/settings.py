@@ -116,13 +116,13 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-# This tells Django to look for a folder named 'static' in your root directory
+
+# CHANGE THIS LINE: Added 'portfolio' to the path
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'portfolio', 'static'),
 ]
-# ADD THIS LINE:
+
+# Tell WhiteNoise to handle the compression and caching
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
