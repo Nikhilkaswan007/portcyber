@@ -1998,8 +1998,22 @@ body {
 
     .services-track {
         gap: 15px; /* Smaller gap for mobile */
-        /* Flex direction remains row for carousel */
-        padding: 0 5%; /* Add padding to sides to show hints of prev/next */
+    }
+
+    .service-visual-area {
+        position: relative; /* Ensure this is relative for absolute children */
+        height: 100%; /* Allow visual area to take full height */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end; /* Push overlay to bottom */
+    }
+
+    .service-overlay-text {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px 15px; /* Adjust padding for mobile */
     }
 
     .service-window {
