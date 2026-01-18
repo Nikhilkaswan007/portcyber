@@ -1879,7 +1879,7 @@ body {
 .service-visual-area {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 21 / 9; /* Changed from 16/9 to 21/9 for wider desktop view */
     overflow: hidden;
     background:
         radial-gradient(circle at center,
@@ -1920,6 +1920,28 @@ body {
     color: #ffd700;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+/* View Full Details Button */
+.view-full-details-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid #ff3366;
+    color: #ff3366;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    margin-top: 15px; /* Adjust as needed */
+}
+
+.view-full-details-btn:hover {
+    background: #ff3366;
+    color: #000;
+    box-shadow: 0 0 20px rgba(255, 51, 102, 0.5);
 }
 
 /* NAVIGATION BUTTONS */
@@ -1964,27 +1986,151 @@ body {
     }
 }
 
+@media (max-width: 768px) {
+    .services-interface {
+        perspective: none; /* Remove perspective for flatter look */
+        margin-bottom: 40px; /* Adjust spacing */
+        max-width: 100%; /* Ensure it fits smaller screens */
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0 10px; /* Add some padding on the sides */
+    }
+
+    .services-track {
+        gap: 15px; /* Smaller gap for mobile */
+        /* Flex direction remains row for carousel */
+        padding: 0 5%; /* Add padding to sides to show hints of prev/next */
+    }
+
+    .service-window {
+        flex: 0 0 85%; /* Show main item, hint at next/prev */
+        width: 85%; /* Ensure consistent width */
+        opacity: 0.7; /* Slightly dim non-active */
+        filter: blur(0.5px); /* Slight blur for non-active */
+        transform: scale(0.95) rotateY(0deg) !important; /* Flatten and scale a bit */
+        border: 1px solid rgba(255, 51, 102, 0.2) !important; /* Less aggressive border */
+        min-height: 450px; /* Make service window long */
+        display: flex; /* Use flex to control internal layout */
+        flex-direction: column; /* Stack visual area and text vertically */
+    }
+
+    .service-window.active {
+        opacity: 1; /* Fully visible */
+        filter: none; /* No blur */
+        transform: scale(1) rotateY(0deg) !important; /* Active is full scale, flat */
+        box-shadow: 0 0 25px rgba(255, 51, 102, 0.6), inset 0 0 20px rgba(255, 51, 102, 0.2) !important;
+        border-color: #ff3366 !important; /* Stronger border */
+    }
+
+    /* Adjust prev/next for mobile to be less rotated and scaled */
+    .service-window.prev {
+        transform: scale(0.9) rotateY(0deg) translateX(-10px) !important; /* Flat, slightly smaller, shifted left */
+    }
+
+    .service-window.next {
+        transform: scale(0.9) rotateY(0deg) translateX(10px) !important; /* Flat, slightly smaller, shifted right */
+    }
+
+    .service-nav-btn {
+        display: flex; /* Re-enable nav buttons for mobile */
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 8px 12px; /* Smaller padding */
+        font-size: 14px; /* Smaller icon */
+    }
+
+    .service-visual-area {
+        aspect-ratio: 3 / 4; /* Taller aspect ratio for image container */
+        overflow: hidden; /* Important for containing pseudo-element */
+        position: relative;
+        display: flex;
+        flex-direction: column; /* ADDED THIS LINE */
+        align-items: center; /* Center image vertically */
+        justify-content: center; /* Center image horizontally */
+        background: radial-gradient(circle at center, rgba(255, 51, 102, 0.15), rgba(0, 0, 0, 0.95)); /* Fallback background */
+    }
+
+    .service-visual-area::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        filter: blur(10px); /* Blur the background image */
+        z-index: 1;
+        /* The actual image will be set by JS or a more advanced CSS trick if dynamic */
+        /* For now, this blurs the background gradient */
+    }
+
+    .service-visual-area img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Keep image aspect ratio, show empty space */
+        opacity: 1; /* Ensure image is not dimmed */
+        position: relative;
+        z-index: 2; /* Keep image above blurred pseudo-element */
+    }
+
+    .service-overlay-text {
+        position: relative; /* Ensure text flows below image */
+        flex-grow: 1; /* Allow text to take remaining space */
+        bottom: auto;
+        left: auto;
+        padding: 15px;
+        border-left: none;
+        backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.75); /* Ensure text background is visible */
+        display: flex; /* Make it a flex container */
+        flex-direction: column; /* Stack its children vertically */
+        justify-content: space-between; /* Push elements apart if needed */
+    }
+}
+    .service-window.prev {
+        transform: scale(0.9) rotateY(0deg) translateX(-10px) !important; /* Flat, slightly smaller, shifted left */
+    }
+
+    .service-window.next {
+        transform: scale(0.9) rotateY(0deg) translateX(10px) !important; /* Flat, slightly smaller, shifted right */
+    }
+
+    .service-nav-btn {
+        display: flex; /* Re-enable nav buttons for mobile */
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 8px 12px; /* Smaller padding */
+        font-size: 14px; /* Smaller icon */
+    }
+}
+
+
+
 /* Styles for the View Details Button inside service-overlay-text */
 .service-overlay-text .view-full-details-btn {
     display: inline-block;
     margin-top: 15px; /* Adjust spacing from description */
-    padding: 8px 15px;
-    background: #00ff88; /* Green button */
-    border: 1px solid #00ff88;
-    color: #000;
+    padding: 10px 20px; /* Slightly larger padding */
+    background: rgba(0, 255, 136, 0.1); /* Subtle green background */
+    border: 1px solid #00ff88; /* Green border */
+    color: #00ff88; /* Green text */
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-size: 9px;
+    font-size: 10px; /* Slightly larger font */
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none; /* Ensure no underline */
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.4); /* Subtle initial glow */
+    clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%); /* Angular shape */
 }
 
 .service-overlay-text .view-full-details-btn:hover {
-    background: #ff3366; /* Red on hover */
-    border-color: #ff3366;
-    color: #000;
-    box-shadow: 0 0 10px rgba(255, 51, 102, 0.7);
+    background: #00ff88; /* Solid green on hover */
+    border-color: #00ff88;
+    color: #000; /* Black text on hover */
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.8), inset 0 0 10px rgba(0, 255, 136, 0.4); /* Stronger glow on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
 }
 
 /* ========================================
