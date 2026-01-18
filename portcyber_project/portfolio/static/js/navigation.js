@@ -365,6 +365,39 @@ function initCyberpunkServicesCarousel() {
     });
 }
 
+// Moved these functions outside initCyberpunkServicesCarousel to be globally accessible
+const handleViewDetailsClickWrapper = (event) => {
+    const clickedWindow = event.currentTarget.closest('.service-window');
+    // Ensure it's a real item and not a clone if carousel is active
+    if (clickedWindow && (!clickedWindow.classList.contains('is-clone') || window.innerWidth <= 768)) {
+        handleViewDetailsClick(clickedWindow.dataset.serviceId);
+    }
+};
+
+const handleViewDetailsClick = (serviceId) => {
+    if (window.loadModule) {
+        window.loadModule('service_detail', serviceId);
+    } else {
+        console.error("loadModule not available globally!");
+    }
+};
+
+// New function to attach listeners to service windows, for both desktop and mobile
+function attachServiceWindowListeners() {
+    document.querySelectorAll('.service-window:not(.is-clone)').forEach(window => {
+        const visualArea = window.querySelector('.service-visual-area');
+        const viewFullDetailsButton = window.querySelector('.view-full-details-btn');
+
+        // Remove previous listeners to prevent duplicates (important for HTMX content)
+        if (visualArea) visualArea.removeEventListener('click', handleViewDetailsClickWrapper);
+        if (viewFullDetailsButton) viewFullDetailsButton.removeEventListener('click', handleViewDetailsClickWrapper);
+
+        // Attach new listeners
+        if (visualArea) visualArea.addEventListener('click', handleViewDetailsClickWrapper);
+        if (viewFullDetailsButton) viewFullDetailsButton.addEventListener('click', handleViewDetailsClickWrapper);
+    });
+}
+
 
 function initializeModuleInteractions(moduleName) {
     try {
@@ -376,7 +409,10 @@ function initializeModuleInteractions(moduleName) {
                 if (typeof initLogsInteractions === 'function') initLogsInteractions();
                 break;
             case 'services':
-                if (typeof initCyberpunkServicesCarousel === 'function') initCyberpunkServicesCarousel(); // Corrected call
+                attachServiceWindowListeners(); // Always attach click listeners
+                if (typeof initCyberpunkServicesCarousel === 'function') { // Call it unconditionally
+                    initCyberpunkServicesCarousel();
+                }
                 break;
             case 'service_detail': // NEW CASE FOR SERVICE DETAIL PAGE
                 // No specific JS interaction for service detail, just rendering
