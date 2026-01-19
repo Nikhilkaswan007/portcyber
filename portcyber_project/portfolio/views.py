@@ -3,7 +3,8 @@ from django.views import View
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.template.loader import render_to_string
-from .models import SiteStats, ContactSubmission
+from .models import SiteStats, ContactSubmission, LogEntry
+from django.db.models import Q
 from django.utils import timezone
 import json
 
@@ -113,7 +114,44 @@ class AchievementsView(View):
 
 class LogsView(View):
     def get(self, request):
-        html_fragment = render_to_string('modules/_logs_fragment.html', request=request)
+        all_logs = LogEntry.objects.prefetch_related('sections').order_by('-created_at')
+        
+        pinned_logs = all_logs.filter(is_pinned=True)
+        recent_logs = all_logs.filter(is_pinned=False)[:3]
+        
+        context = {
+            'recent_logs': recent_logs,
+            'pinned_logs': pinned_logs,
+        }
+        
+        html_fragment = render_to_string('modules/_logs_fragment.html', context, request=request)
+        return HttpResponse(html_fragment)
+
+class AllLogsView(View):
+    def get(self, request):
+        logs = LogEntry.objects.prefetch_related('sections').all()
+
+        # Search
+        query = request.GET.get('q')
+        search_content = request.GET.get('search_content')
+        if query:
+            search_fields = Q(title__icontains=query)
+            if search_content:
+                search_fields |= Q(sections__content__icontains=query)
+            logs = logs.filter(search_fields).distinct()
+
+        # Sort
+        sort_by = request.GET.get('sort', '-created_at')
+        logs = logs.order_by(sort_by)
+
+        context = {
+            'logs': logs,
+            'search_query': query or "",
+            'search_content': search_content,
+            'sort_by': sort_by,
+        }
+        
+        html_fragment = render_to_string('modules/_all_logs_fragment.html', context, request=request)
         return HttpResponse(html_fragment)
 
 class CreationsView(View):

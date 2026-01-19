@@ -12,6 +12,7 @@ urlpatterns = [
     # Non-API routes (for direct linking or fallback, if needed)
     path('achievements/', views.AchievementsView.as_view(), name='achievements'),
     path('logs/', views.LogsView.as_view(), name='logs'),
+    path('logs/all/', views.AllLogsView.as_view(), name='all_logs'),
     path('creations/', views.CreationsView.as_view(), name='creations'),
     path('services/', views.ServicesView.as_view(), name='services'),
     path('connect/', views.ConnectView.as_view(), name='connect'),
@@ -20,6 +21,7 @@ urlpatterns = [
     path('api/content/dashboard/', views.DashboardView.as_view(), name='api-dashboard'),
     path('api/content/achievements/', views.AchievementsView.as_view(), name='api-achievements'),
     path('api/content/logs/', views.LogsView.as_view(), name='api-logs'),
+    path('api/content/logs/all/', views.AllLogsView.as_view(), name='api-all-logs'),
     path('api/content/creations/', views.CreationsView.as_view(), name='api-creations'),
     path('api/content/services/', views.ServicesView.as_view(), name='api-services'),
     path('api/content/service/<str:service_id>/', views.ServiceDetailView.as_view(), name='api-service-detail'),

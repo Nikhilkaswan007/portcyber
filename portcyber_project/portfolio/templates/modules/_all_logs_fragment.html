@@ -1,0 +1,82 @@
+<div class="page-title">
+    <h1>ALL SYSTEM LOGS</h1>
+</div>
+
+<div class="search-toggle-container">
+    <button id="back-to-logs-btn" class="btn btn-green-outline" onclick="loadModule('logs')">&lt; Back</button>
+    <button id="search-toggle-btn" class="btn btn-green-outline">Search & Filter</button>
+</div>
+
+<div id="search-form-container" class="log-search-container collapsible">
+    <form method="get" action="{% url 'api-all-logs' %}" class="log-search-form">
+        <div class="form-group">
+            <label for="search-input" class="form-label">Search Query</label>
+            <input type="text" id="search-input" name="q" class="form-input" placeholder="Enter keywords..." value="{{ search_query }}">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Sort By</label>
+            <div class="sort-button-group">
+                <input type="radio" id="sort-newest" name="sort" value="-created_at" {% if sort_by == '-created_at' %}checked{% endif %} class="sort-radio">
+                <label for="sort-newest" class="sort-button">Newest First</label>
+
+                <input type="radio" id="sort-oldest" name="sort" value="created_at" {% if sort_by == 'created_at' %}checked{% endif %} class="sort-radio">
+                <label for="sort-oldest" class="sort-button">Oldest First</label>
+
+                <input type="radio" id="sort-title-asc" name="sort" value="title" {% if sort_by == 'title' %}checked{% endif %} class="sort-radio">
+                <label for="sort-title-asc" class="sort-button">Title (A-Z)</label>
+
+                <input type="radio" id="sort-title-desc" name="sort" value="-title" {% if sort_by == '-title' %}checked{% endif %} class="sort-radio">
+                <label for="sort-title-desc" class="sort-button">Title (Z-A)</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="cyberpunk-checkbox-container">
+                Include content in search
+                <input type="checkbox" name="search_content" value="on" {% if search_content %}checked{% endif %}>
+                <span class="checkmark"></span>
+            </label>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="form-button">Search Logs</button>
+        </div>
+    </form>
+</div>
+
+<div class="log-container">
+    {% for log in logs %}
+    <div class="log-entry">
+        <div class="log-header">
+            <div class="log-title">📝 {{ log.title|upper }}</div>
+            <div class="log-date">{{ log.log_date }}</div>
+        </div>
+        <div class="log-meta">
+            <span class="log-meta-item"><span class="log-meta-label">STATUS:</span><span class="log-meta-value">{{ log.status|upper }}</span></span>
+            <span class="log-meta-item"><span class="log-meta-label">TYPE:</span><span class="log-meta-value">{{ log.entry_type|upper }}</span></span>
+            {% if log.is_pinned %}
+            <span class="log-meta-item"><span class="log-meta-label">PINNED:</span><span class="log-meta-value">YES</span></span>
+            {% endif %}
+        </div>
+        <div class="log-body">
+            {% for section in log.sections.all %}
+            <div class="log-section">
+                <div class="log-section-title">{{ section.title|upper }}</div>
+                <div class="log-section-content">
+                    {{ section.content|safe|linebreaksbr }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="log-entry">
+        <div class="log-body">
+            <div class="log-section">
+                <div class="log-section-title">NO LOGS FOUND</div>
+                <div class="log-section-content">
+                    Your search returned no results. Try a different query.
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>

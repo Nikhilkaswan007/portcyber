@@ -2,73 +2,58 @@
     <h1>SYSTEM LOGS</h1>
 </div>
 
-<div class="log-container">
-    <div class="log-entry">
-        <div class="log-header">
-            <div class="log-title">📝 DJANGO PORTFOLIO MIGRATION</div>
-            <div class="log-date">JANUARY 2026</div>
-        </div>
-        <div class="log-meta">
-            <span class="log-meta-item"><span class="log-meta-label">STATUS:</span><span class="log-meta-value">COMPLETED</span></span>
-            <span class="log-meta-item"><span class="log-meta-label">TYPE:</span><span class="log-meta-value">SYSTEM UPGRADE</span></span>
-        </div>
-        <div class="log-body">
-            <div class="log-section">
-                <div class="log-section-title">SUMMARY</div>
-                <div class="log-section-content">
-                    Successfully migrated cyberpunk portfolio to Django framework. This represents a major architectural shift from static HTML to a full-stack Python application with dynamic templating and backend capabilities.
-                </div>
-            </div>
-            <div class="log-section">
-                <div class="log-section-title">TASKS COMPLETED</div>
-                <div class="log-section-content">
-                    <ul>
-                        <li>Django project initialization and configuration</li>
-                        <li>Portfolio app creation with views and templates</li>
-                        <li>Static file organization (CSS, JavaScript, assets)</li>
-                        <li>Template inheritance and base layout implementation</li>
-                        <li>Three.js background integration</li>
-                        <li>Cyberpunk theme CSS consolidation</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
 
+<div class="log-container">
+    {% for log in recent_logs %}
     <div class="log-entry">
         <div class="log-header">
-            <div class="log-title">🎨 CYBERPUNK UI DEVELOPMENT</div>
-            <div class="log-date">DECEMBER 2025</div>
+            <div class="log-title">📝 {{ log.title|upper }}</div>
+            <div class="log-date">{{ log.log_date }}</div>
         </div>
         <div class="log-meta">
-            <span class="log-meta-item"><span class="log-meta-label">STATUS:</span><span class="log-meta-value">COMPLETED</span></span>
-            <span class="log-meta-item"><span class="log-meta-label">TYPE:</span><span class="log-meta-value">DESIGN</span></span>
+            <span class="log-meta-item"><span class="log-meta-label">STATUS:</span><span class="log-meta-value">{{ log.status|upper }}</span></span>
+            <span class="log-meta-item"><span class="log-meta-label">TYPE:</span><span class="log-meta-value">{{ log.entry_type|upper }}</span></span>
         </div>
         <div class="log-body">
+            {% for section in log.sections.all %}
             <div class="log-section">
-                <div class="log-section-title">SUMMARY</div>
+                <div class="log-section-title">{{ section.title|upper }}</div>
                 <div class="log-section-content">
-                    Designed and implemented a complete cyberpunk-themed interface system featuring neon colors, glassmorphism, scanlines, and a terminal-style HUD aesthetic.
+                    {{ section.content|safe|linebreaksbr }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="log-entry">
+        <div class="log-body">
+            <div class="log-section">
+                <div class="log-section-title">NO RECENT LOGS</div>
+                <div class="log-section-content">
+                    System is currently stable. No new logs to display.
                 </div>
             </div>
         </div>
     </div>
+    {% endfor %}
 </div>
 
+<div style="text-align: right; margin-bottom: 20px;">
+    <a href="#" onclick="loadModule('all_logs')" class="btn btn-green-outline">MORE LOGS &gt;</a>
+</div>
+
+
+{% if pinned_logs %}
 <div class="older-logs">
     <div class="older-logs-title">ARCHIVED LOGS</div>
     <div class="older-log-list">
+        {% for log in pinned_logs %}
         <div class="older-log-item">
-            <div class="older-log-item-title">Initial HTML Concepts</div>
-            <div class="older-log-item-date">September 2025</div>
+            <div class="older-log-item-title">{{ log.title }}</div>
+            <div class="older-log-item-date">{{ log.log_date }}</div>
         </div>
-        <div class="older-log-item">
-            <div class="older-log-item-title">Three.js Integration</div>
-            <div class="older-log-item-date">October 2025</div>
-        </div>
-        <div class="older-log-item">
-            <div class="older-log-item-title">Animation Framework</div>
-            <div class="older-log-item-date">November 2025</div>
-        </div>
+        {% endfor %}
     </div>
 </div>
+{% endif %}

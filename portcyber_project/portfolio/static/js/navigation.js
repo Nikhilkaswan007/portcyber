@@ -13,6 +13,11 @@ const navigationConfig = {
         icon: '📝',
         path: '/api/content/logs/'
     },
+    all_logs: {
+        label: 'ALL_LOGS',
+        icon: '🗂️',
+        path: '/api/content/logs/all/'
+    },
     achievements: {
         label: 'ACHIEVEMENTS',
         icon: '🏆',
@@ -183,7 +188,7 @@ function updateNavTabs() {
     
     Object.entries(navigationConfig).forEach(([key, config]) => {
         // Only show main navigation items, not detail pages, and EXCLUDE 'profile'
-        if (key !== 'profile' && config.label !== 'SERVICE_DETAIL') { 
+        if (key !== 'profile' && config.label !== 'SERVICE_DETAIL' && key !== 'all_logs') { 
             const tab = document.createElement('a');
             tab.href = '#';
             tab.className = 'nav-tab' + (key === currentModule ? ' active' : '');
@@ -374,13 +379,74 @@ const handleViewDetailsClickWrapper = (event) => {
     }
 };
 
-const handleViewDetailsClick = (serviceId) => {
+function handleViewDetailsClick(serviceId) {
     if (window.loadModule) {
         window.loadModule('service_detail', serviceId);
     } else {
         console.error("loadModule not available globally!");
     }
 };
+
+function reloadModuleWithQuery(moduleName, queryString) {
+    const mainContent = document.getElementById('main-content');
+    const contentLoader = document.getElementById('content-loader');
+
+    if (!mainContent || !contentLoader) {
+        console.error('[NAV] Missing mainContent or contentLoader for reload.');
+        return;
+    }
+
+    contentLoader.style.display = 'flex';
+    mainContent.innerHTML = '';
+
+    let fetchPath = navigationConfig[moduleName].path;
+    fetchPath += queryString;
+
+    fetch(fetchPath)
+        .then(response => response.text())
+        .then(html => {
+            contentLoader.style.display = 'none';
+            mainContent.innerHTML = html;
+            initializeModuleInteractions(moduleName); // Re-initialize to attach listeners again
+        })
+        .catch(error => {
+            console.error(`[NAV] Failed to reload content for ${moduleName}:`, error);
+            contentLoader.style.display = 'none';
+            mainContent.innerHTML = `<div class="loader-text" style="color: #ff3366;">RELOAD_ERROR</div>`;
+        });
+}
+
+function initAllLogsInteractions() {
+    const form = document.querySelector('.log-search-form');
+    if (form) {
+        const select = form.querySelector('select[name="sort"]');
+
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const queryString = '?' + params.toString();
+            reloadModuleWithQuery('all_logs', queryString);
+        };
+
+        form.addEventListener('submit', handleSubmit);
+
+        if (select) {
+            select.addEventListener('change', () => {
+                form.requestSubmit();
+            });
+        }
+    }
+
+    const toggleBtn = document.getElementById('search-toggle-btn');
+    const searchContainer = document.getElementById('search-form-container');
+
+    if (toggleBtn && searchContainer) {
+        toggleBtn.addEventListener('click', () => {
+            searchContainer.classList.toggle('expanded');
+        });
+    }
+}
 
 // New function to attach listeners to service windows, for both desktop and mobile
 function attachServiceWindowListeners() {
@@ -407,6 +473,9 @@ function initializeModuleInteractions(moduleName) {
                 break;
             case 'logs':
                 if (typeof initLogsInteractions === 'function') initLogsInteractions();
+                break;
+            case 'all_logs':
+                if (typeof initAllLogsInteractions === 'function') initAllLogsInteractions();
                 break;
             case 'services':
                 attachServiceWindowListeners(); // Always attach click listeners

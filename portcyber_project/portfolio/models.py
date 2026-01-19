@@ -27,3 +27,26 @@ class SiteStats(models.Model):
 
     class Meta:
         verbose_name_plural = "Site Stats"
+
+
+class LogEntry(models.Model):
+    title = models.CharField(max_length=200)
+    log_date = models.CharField(max_length=100)  # For manual text input like "JANUARY 2026"
+    status = models.CharField(max_length=50)
+    entry_type = models.CharField(max_length=50)
+    is_pinned = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-created_at']
+
+class LogSection(models.Model):
+    log_entry = models.ForeignKey(LogEntry, related_name='sections', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+
+    def __str__(self):
+        return f"{self.log_entry.title} - {self.title}"
