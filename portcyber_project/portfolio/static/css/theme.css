@@ -3171,6 +3171,20 @@ select.form-input {
     width: 100%;
 }
 
+/* Fix: Ensure log actions are always visible in the overlay */
+.log-detail-overlay-content .log-actions {
+    opacity: 1 !important;
+    visibility: visible !important;
+    height: auto !important;
+    transform: none !important;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 51, 102, 0.3);
+}
+
 .log-detail-header .log-title {
     font-size: 16px;
     color: #ff3366;

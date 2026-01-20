@@ -207,7 +207,7 @@ function wireShareButtons() {
             e.stopPropagation();
             const logId = btn.dataset.logId;
             if (logId) {
-                shareLogLink(logId);
+                shareLogLink(logId, btn);
             }
         };
     });
