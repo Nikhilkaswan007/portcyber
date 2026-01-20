@@ -2,5 +2,4 @@
 # Ignore the SQLite database file
 *.sqlite3
 portcyber_project/db.sqlite3
-#*.requirements.txt
 portcyber_project\.venv
