@@ -423,10 +423,24 @@ function initAllLogsInteractions() {
 
         const handleSubmit = (e) => {
             e.preventDefault();
+
+            // Add loading state to form
+            const submitBtn = form.querySelector('.form-button');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'SEARCHING...';
+            submitBtn.disabled = true;
+
             const formData = new FormData(form);
             const params = new URLSearchParams(formData);
             const queryString = '?' + params.toString();
+
             reloadModuleWithQuery('all_logs', queryString);
+
+            // Reset button after a delay (will be overridden if page reloads)
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
         };
 
         form.addEventListener('submit', handleSubmit);
@@ -438,12 +452,30 @@ function initAllLogsInteractions() {
         }
     }
 
+    // Enhanced search toggle with animations and feedback
     const toggleBtn = document.getElementById('search-toggle-btn');
     const searchContainer = document.getElementById('search-form-container');
 
     if (toggleBtn && searchContainer) {
         toggleBtn.addEventListener('click', () => {
+            const isExpanded = searchContainer.classList.contains('expanded');
+
+            // Toggle the expanded state
             searchContainer.classList.toggle('expanded');
+
+            // Update button text with animation
+            toggleBtn.style.pointerEvents = 'none';
+            toggleBtn.textContent = isExpanded ? 'Search & Filter' : 'Hide Search';
+
+            // Add visual feedback
+            if (window.systemFeedback) {
+                window.systemFeedback.message(isExpanded ? 'SEARCH_COLLAPSED' : 'SEARCH_EXPANDED', 'info');
+            }
+
+            // Re-enable pointer events after animation
+            setTimeout(() => {
+                toggleBtn.style.pointerEvents = 'auto';
+            }, 400); // Match CSS transition
         });
     }
 }
@@ -521,11 +553,89 @@ function initCreationsInteractions() {
 }
 
 function initLogsInteractions() {
+    // Enhanced log header click handlers with animations
     document.querySelectorAll('.log-header').forEach(header => {
         header.addEventListener('click', function() {
             const entry = this.closest('.log-entry');
+
+            // Add visual feedback during transition
+            entry.style.pointerEvents = 'none';
+
+            // Toggle expanded state
+            const wasExpanded = entry.classList.contains('expanded');
             entry.classList.toggle('expanded');
+
+            // System feedback
+            if (window.systemFeedback) {
+                window.systemFeedback.message(wasExpanded ? 'LOG_COLLAPSED' : 'LOG_EXPANDED', 'info');
+            }
+
+            // Re-enable pointer events after animation
+            setTimeout(() => {
+                entry.style.pointerEvents = 'auto';
+            }, 500); // Match CSS transition duration
         });
+    });
+
+    // Enhanced "Read More" button handlers with better UX
+    document.querySelectorAll('.read-more-log').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent the log-header click from triggering
+
+            const logId = this.dataset.logId;
+            if (logId) {
+                // Add loading state to button
+                const originalText = this.textContent;
+                this.textContent = 'LOADING...';
+                this.disabled = true;
+
+                try {
+                    // Call the overlay function
+                    window.openLogDetailOverlay(logId);
+
+                    // Reset button after a short delay
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.disabled = false;
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Error opening log detail:', error);
+                    this.textContent = 'ERROR';
+                    this.style.borderColor = '#ff3366';
+                    this.style.color = '#ff3366';
+
+                    // Reset after error display
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.disabled = false;
+                        this.style.borderColor = '';
+                        this.style.color = '';
+                    }, 2000);
+
+                    if (window.systemFeedback) {
+                        window.systemFeedback.error('LOG_LOAD_ERROR');
+                    }
+                }
+            } else {
+                console.error('Log ID not found for "Read More" button.');
+                if (window.systemFeedback) {
+                    window.systemFeedback.error('INVALID_LOG_ID');
+                }
+            }
+        });
+    });
+
+    // Add keyboard navigation for accessibility
+    document.addEventListener('keydown', function(event) {
+        // Enter or Space to expand/collapse logs
+        if (event.key === 'Enter' || event.key === ' ') {
+            const focusedElement = document.activeElement;
+            if (focusedElement && focusedElement.classList.contains('log-header')) {
+                event.preventDefault();
+                focusedElement.click();
+            }
+        }
     });
 }
 

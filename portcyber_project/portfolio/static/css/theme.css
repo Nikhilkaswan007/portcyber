@@ -1556,14 +1556,6 @@ body {
     margin-left: 5px;
 }
 
-.log-body {
-    padding: 20px;
-    display: none;
-}
-
-.log-entry.expanded .log-body {
-    display: block;
-}
 
 .log-section {
     margin-bottom: 25px;
@@ -2771,4 +2763,435 @@ select.form-input {
     .service-gallery {
         grid-template-columns: 1fr;
     }
+}
+
+/* ========================================
+   LOG ACTIONS & READ MORE BUTTONS
+   ======================================== */
+
+.log-actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 51, 102, 0.2);
+    text-align: right;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.older-log-item.log-entry.expanded .log-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.read-more-log {
+    display: inline-block;
+    padding: 10px 20px;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid #00ff88;
+    color: #00ff88;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+    clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.read-more-log::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.read-more-log:hover::before {
+    left: 100%;
+}
+
+.read-more-log:hover {
+    background: #00ff88;
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.8), inset 0 0 10px rgba(0, 255, 136, 0.4);
+    transform: translateY(-2px);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+.read-more-log:active {
+    transform: translateY(0);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+}
+
+/* ========================================
+   LOG DETAIL OVERLAY - ENHANCED ANIMATIONS
+   ======================================== */
+
+.log-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    display: none;
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.log-detail-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+.log-detail-overlay-content-wrapper {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    transform: scale(0.95) translateY(20px);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.log-detail-overlay.active .log-detail-overlay-content-wrapper {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.log-detail-overlay-content {
+    max-width: 900px;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid rgba(255, 51, 102, 0.5);
+    padding: 30px;
+    box-shadow:
+        0 0 50px rgba(255, 51, 102, 0.3),
+        0 0 100px rgba(255, 51, 102, 0.1),
+        inset 0 0 50px rgba(0, 0, 0, 0.5);
+    position: relative;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 2px;
+    animation: logDetailGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes logDetailGlow {
+    0% { box-shadow: 0 0 50px rgba(255, 51, 102, 0.3), 0 0 100px rgba(255, 51, 102, 0.1), inset 0 0 50px rgba(0, 0, 0, 0.5); }
+    100% { box-shadow: 0 0 70px rgba(255, 51, 102, 0.5), 0 0 150px rgba(255, 51, 102, 0.2), inset 0 0 70px rgba(0, 0, 0, 0.7); }
+}
+
+.log-detail-header {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 51, 102, 0.3);
+    position: relative;
+}
+
+.log-detail-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ff3366, #00ff88);
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.log-detail-overlay.active .log-detail-header::after {
+    width: 100%;
+}
+
+.log-detail-header .log-title {
+    font-size: 16px;
+    color: #ff3366;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+    animation: titlePulse 2s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(255, 51, 102, 0.5); }
+    50% { text-shadow: 0 0 20px rgba(255, 51, 102, 0.8), 0 0 30px rgba(255, 51, 102, 0.4); }
+}
+
+.log-detail-header .log-date {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.back-to-logs-btn {
+    align-self: flex-start;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid #00ff88;
+    color: #00ff88;
+    padding: 8px 15px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+    clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.back-to-logs-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.back-to-logs-btn:hover::before {
+    left: 100%;
+}
+
+.back-to-logs-btn:hover {
+    background: #00ff88;
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.8), inset 0 0 10px rgba(0, 255, 136, 0.4);
+    transform: translateY(-2px);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+.back-to-logs-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+}
+
+/* ========================================
+   ENHANCED LOG ENTRY ANIMATIONS
+   ======================================== */
+
+.log-entry {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 51, 102, 0.3);
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    overflow: hidden;
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.log-entry:hover {
+    border-color: #ff3366;
+    box-shadow: 0 0 30px rgba(255, 51, 102, 0.3), 0 0 60px rgba(255, 51, 102, 0.1);
+    transform: translateX(5px);
+}
+
+.log-entry::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 51, 102, 0.1), transparent);
+    transition: left 0.6s;
+}
+
+.log-entry:hover::before {
+    left: 100%;
+}
+
+.log-body {
+    padding: 20px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    visibility: hidden;
+}
+
+.log-entry.expanded .log-body {
+    max-height: 2000px; /* Large enough for content */
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+/* ========================================
+   ENHANCED SEARCH FORM ANIMATIONS
+   ======================================== */
+
+.collapsible {
+    display: none;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.collapsible.expanded {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.sort-button {
+    padding: 10px 15px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 51, 102, 0.3);
+    color: #888;
+    text-transform: uppercase;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+}
+
+.sort-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 51, 102, 0.2), transparent);
+    transition: left 0.4s;
+}
+
+.sort-button:hover::before {
+    left: 100%;
+}
+
+.sort-button:hover {
+    border-color: #ff3366;
+    color: #ff3366;
+    transform: translateY(-1px);
+    box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);
+}
+
+.sort-radio:checked + .sort-button {
+    border-color: #ff3366;
+    color: #000;
+    background: #ff3366;
+    box-shadow: 0 0 15px rgba(255, 51, 102, 0.5);
+    animation: buttonGlow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes buttonGlow {
+    0% { box-shadow: 0 0 15px rgba(255, 51, 102, 0.5); }
+    100% { box-shadow: 0 0 25px rgba(255, 51, 102, 0.8), 0 0 35px rgba(255, 51, 102, 0.4); }
+}
+
+/* ========================================
+   MOBILE OPTIMIZATIONS
+   ======================================== */
+
+@media (max-width: 768px) {
+    .log-detail-overlay-content-wrapper {
+        padding: 20px 10px;
+    }
+
+    .log-detail-overlay-content {
+        padding: 20px;
+        max-width: 100%;
+    }
+
+    .log-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .log-entry:hover {
+        transform: translateX(2px);
+    }
+
+    .read-more-log,
+    .back-to-logs-btn {
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .older-log-list {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .log-search-container {
+        padding: 20px;
+        margin: 0 auto 30px auto;
+    }
+}
+
+/* ========================================
+   LOADING ANIMATIONS
+   ======================================== */
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 51, 102, 0.3);
+    border-top: 3px solid #ff3366;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader-text {
+    text-align: center;
+    color: #ff3366;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+}
+
+/* ========================================
+   ACCESSIBILITY IMPROVEMENTS
+   ======================================== */
+
+.read-more-log:focus,
+.back-to-logs-btn:focus,
+.sort-button:focus {
+    outline: 2px solid #00ff88;
+    outline-offset: 2px;
+}
+
+.log-header:focus {
+    outline: 2px solid #ff3366;
+    outline-offset: 2px;
+}
+
+/* Smooth scrolling for overlay */
+.log-detail-overlay {
+    scroll-behavior: smooth;
 }
