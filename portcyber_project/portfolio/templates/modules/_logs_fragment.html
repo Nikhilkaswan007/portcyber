@@ -5,7 +5,7 @@
 
 <div class="log-container">
     {% for log in recent_logs %}
-    <div class="log-entry">
+    <div class="log-entry" data-log-id="{{ log.id }}">
         <div class="log-header">
             <div class="log-title">📝 {{ log.title|upper }}</div>
             <div class="log-date">{{ log.log_date }}</div>
@@ -14,7 +14,7 @@
             <span class="log-meta-item"><span class="log-meta-label">STATUS:</span><span class="log-meta-value">{{ log.status|upper }}</span></span>
             <span class="log-meta-item"><span class="log-meta-label">TYPE:</span><span class="log-meta-value">{{ log.entry_type|upper }}</span></span>
         </div>
-        <div class="log-body">
+        <div class="log-body{% if log.is_long_content %} long-content{% endif %}">
             {% for section in log.sections.all %}
             <div class="log-section">
                 <div class="log-section-title">{{ section.title|upper }}</div>
@@ -23,6 +23,17 @@
                 </div>
             </div>
             {% endfor %}
+            {% if log.is_long_content %}
+            <div class="log-bottom-indicator">
+                <span class="at-bottom-text">AT BOTTOM</span>
+            </div>
+            {% endif %}
+        </div>
+        <div class="log-actions">
+            <button class="btn btn-green-outline share-log" data-log-id="{{ log.id }}">SHARE</button>
+            {% if log.is_long_content %}
+            <button class="btn btn-green-outline read-more-log" data-log-id="{{ log.id }}">VIEW FULL LOG</button>
+            {% endif %}
         </div>
     </div>
     {% empty %}
@@ -49,7 +60,7 @@
     <div class="older-logs-title">ARCHIVED LOGS</div>
     <div class="older-log-list">
         {% for log in pinned_logs %}
-        <div class="older-log-item">
+        <div class="older-log-item" data-log-id="{{ log.id }}" role="button" aria-label="Open full log {{ log.title }}">
             <div class="older-log-item-title">{{ log.title }}</div>
             <div class="older-log-item-date">{{ log.log_date }}</div>
         </div>

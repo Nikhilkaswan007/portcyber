@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
@@ -125,6 +125,15 @@ class LogsView(View):
         }
         
         html_fragment = render_to_string('modules/_logs_fragment.html', context, request=request)
+        return HttpResponse(html_fragment)
+
+class LogDetailView(View):
+    def get(self, request, pk):
+        log = get_object_or_404(LogEntry, pk=pk)
+        context = {
+            'log': log,
+        }
+        html_fragment = render_to_string('modules/_log_detail_fragment.html', context, request=request)
         return HttpResponse(html_fragment)
 
 class AllLogsView(View):

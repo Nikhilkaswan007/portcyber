@@ -21,6 +21,7 @@ urlpatterns = [
     path('api/content/dashboard/', views.DashboardView.as_view(), name='api-dashboard'),
     path('api/content/achievements/', views.AchievementsView.as_view(), name='api-achievements'),
     path('api/content/logs/', views.LogsView.as_view(), name='api-logs'),
+    path('api/content/log/<int:pk>/', views.LogDetailView.as_view(), name='api-log-detail'),
     path('api/content/logs/all/', views.AllLogsView.as_view(), name='api-all-logs'),
     path('api/content/creations/', views.CreationsView.as_view(), name='api-creations'),
     path('api/content/services/', views.ServicesView.as_view(), name='api-services'),

@@ -1,0 +1,28 @@
+﻿<div class="log-detail-overlay-content">
+    <div class="log-detail-header">
+        <button class="btn btn-green-outline back-to-logs-btn" onclick="closeLogDetailOverlay()">
+            &lt; BACK
+        </button>
+        <div class="log-title">{{ log.title|upper }}</div>
+        <div class="log-date">{{ log.log_date }}</div>
+    </div>
+    <div class="log-meta" style="border-bottom: none; padding-left: 0; margin-bottom: 20px;">
+        <span class="log-meta-item"><span class="log-meta-label">STATUS:</span><span class="log-meta-value">{{ log.status|upper }}</span></span>
+        <span class="log-meta-item"><span class="log-meta-label">TYPE:</span><span class="log-meta-value">{{ log.entry_type|upper }}</span></span>
+    </div>
+    <div class="log-body" style="opacity: 1; transform: none; visibility: visible; max-height: none; padding: 0;">
+        {% for section in log.sections.all %}
+        <div class="log-section">
+            <div class="log-section-title">{{ section.title|upper }}</div>
+            <div class="log-section-content">
+                {{ section.content|safe|linebreaksbr }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="log-actions" style="margin-top: 40px; border-top: 1px solid rgba(255, 51, 102, 0.3);">
+        <button class="btn btn-green-outline share-log" data-log-id="{{ log.id }}">SHARE ENTRY</button>
+        <button class="btn btn-green-outline" onclick="closeLogDetailOverlay()">CLOSE</button>
+    </div>
+</div>

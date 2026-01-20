@@ -1,8 +1,11 @@
 let lastScrollY = 0; // To store scroll position before opening overlay
 let overlayTimeout = null; // For managing animation timing
 let escapeListenerAttached = false; // Flag to prevent duplicate escape key listeners
+let shareInProgress = false; // Prevent double share taps
 
-function openLogDetailOverlay(logId) {
+
+// Internal function - renamed to avoid conflict/recursion with window.openLogDetailOverlay
+function _openLogDetailOverlay(logId) {
     const overlay = document.getElementById('log-detail-overlay');
     const overlayContent = document.getElementById('log-detail-overlay-content');
 
@@ -53,6 +56,9 @@ function openLogDetailOverlay(logId) {
                     escapeListenerAttached = true;
                 }
 
+                // Wire share buttons inside overlay
+                wireShareButtons();
+
                 // Announce to system feedback
                 if (window.systemFeedback) {
                     window.systemFeedback.message('LOG_DETAIL_LOADED', 'info');
@@ -87,7 +93,7 @@ function openLogDetailOverlay(logId) {
         });
 }
 
-function closeLogDetailOverlay() {
+function _closeLogDetailOverlay() {
     const overlay = document.getElementById('log-detail-overlay');
     const overlayContent = document.getElementById('log-detail-overlay-content');
 
@@ -121,7 +127,7 @@ function closeLogDetailOverlay() {
 
 function handleEscapeKey(event) {
     if (event.key === 'Escape') {
-        closeLogDetailOverlay();
+        _closeLogDetailOverlay();
     }
 }
 
@@ -145,11 +151,55 @@ function initLogDetailOverlay() {
     return true;
 }
 
+// Share helper with native share fallback to clipboard
+async function shareLogLink(logId) {
+    if (shareInProgress) return;
+    shareInProgress = true;
+
+    const shareUrl = `${window.location.origin}/logs/?log=${logId}`;
+    const shareData = {
+        title: 'System Log',
+        text: 'Check out this log entry',
+        url: shareUrl
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+            if (window.systemFeedback) window.systemFeedback.message('LINK_SHARED', 'success');
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(shareUrl);
+            if (window.systemFeedback) window.systemFeedback.message('LINK_COPIED', 'success');
+        } else {
+            // Fallback: prompt for copy
+            window.prompt('Copy log link:', shareUrl);
+        }
+    } catch (err) {
+        console.error('Share failed:', err);
+        if (window.systemFeedback) window.systemFeedback.error('SHARE_FAILED');
+    } finally {
+        shareInProgress = false;
+    }
+}
+
+function wireShareButtons() {
+    document.querySelectorAll('.share-log').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const logId = btn.dataset.logId;
+            if (logId) {
+                shareLogLink(logId);
+            }
+        };
+    });
+}
+
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', initLogDetailOverlay);
 
 // Expose functions globally with enhanced error handling
-window.openLogDetailOverlay = function(logId) {
+window.shareLogLink = shareLogLink;
+window.openLogDetailOverlay = function (logId) {
     try {
         if (typeof logId === 'undefined' || logId === null) {
             console.error('Log ID is required for openLogDetailOverlay');
@@ -158,7 +208,7 @@ window.openLogDetailOverlay = function(logId) {
             }
             return;
         }
-        openLogDetailOverlay(logId);
+        _openLogDetailOverlay(logId);
     } catch (error) {
         console.error('Error opening log detail overlay:', error);
         if (window.systemFeedback) {
@@ -167,9 +217,9 @@ window.openLogDetailOverlay = function(logId) {
     }
 };
 
-window.closeLogDetailOverlay = function() {
+window.closeLogDetailOverlay = function () {
     try {
-        closeLogDetailOverlay();
+        _closeLogDetailOverlay();
     } catch (error) {
         console.error('Error closing log detail overlay:', error);
     }

@@ -40,6 +40,16 @@ class LogEntry(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def total_content_length(self):
+        """Calculate total length of all section content"""
+        return sum(len(section.content) for section in self.sections.all())
+
+    @property
+    def is_long_content(self):
+        """Check if log content is long enough to need truncation"""
+        return self.total_content_length > 800  # ~200 words threshold
+
     class Meta:
         ordering = ['-created_at']
 

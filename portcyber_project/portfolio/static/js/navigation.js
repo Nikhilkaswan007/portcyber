@@ -75,7 +75,7 @@ function loadModule(moduleName, id = null) {
         if (window.systemFeedback) window.systemFeedback.error(`STATE_UPDATE_ERROR: ${moduleName}`);
         return; // Prevent further execution if state update fails
     }
-    
+
     try {
         // Update navigation tabs - only for main modules, not details
         // Only update nav tabs if we are loading a module that is part of the main navigation
@@ -90,7 +90,7 @@ function loadModule(moduleName, id = null) {
     }
 
     // Load content
-    loadContent(moduleName, id); // Pass id to loadContent
+    return loadContent(moduleName, id); // Pass id to loadContent and return promise
     console.log(`[NAV] loadContent called for ${moduleName}.`);
 }
 
@@ -102,13 +102,13 @@ function loadContent(moduleName, id = null) { // Accept id parameter
 
     if (!mainContent) {
         console.error('[NAV] #main-content element not found!');
-        return;
+        return Promise.reject('#main-content not found');
     }
     if (!contentLoader) {
         console.error('[NAV] #content-loader element not found!');
-        return;
+        return Promise.reject('#content-loader not found');
     }
-    
+
     // Show loader
     try {
         contentLoader.style.display = 'flex'; // Make sure loader is visible
@@ -117,7 +117,7 @@ function loadContent(moduleName, id = null) { // Accept id parameter
     } catch (e) {
         console.error('[NAV] Error setting up loader or clearing mainContent:', e);
         if (window.systemFeedback) window.systemFeedback.error('LOADER_SETUP_ERROR');
-        return;
+        return Promise.reject(e);
     }
 
     // Determine fetch URL
@@ -127,7 +127,7 @@ function loadContent(moduleName, id = null) { // Accept id parameter
     }
 
     // Fetch content
-    fetch(fetchPath)
+    return fetch(fetchPath)
         .then(response => {
             console.log(`[NAV] Fetch response received for ${moduleName}:`, response);
             if (!response.ok) {
@@ -151,13 +151,13 @@ function loadContent(moduleName, id = null) { // Accept id parameter
                 mainContent.innerHTML = `<div class="loader-text" style="color: #ff3366;">ERROR_INJECTING_CONTENT</div>`;
                 return;
             }
-            
+
             // Initialize interactive elements
             initializeModuleInteractions(moduleName);
-            
+
             // Announce to system
             window.systemState.addToHistory(`Loaded ${moduleName} module`);
-            
+
             // Analytics tracking (if trackModuleAccess is defined)
             if (typeof trackModuleAccess === 'function') {
                 trackModuleAccess(moduleName);
@@ -183,12 +183,12 @@ function updateNavTabs() {
         return;
     }
     const currentModule = window.systemState.getModule();
-    
+
     navTabs.innerHTML = '';
-    
+
     Object.entries(navigationConfig).forEach(([key, config]) => {
         // Only show main navigation items, not detail pages, and EXCLUDE 'profile'
-        if (key !== 'profile' && config.label !== 'SERVICE_DETAIL' && key !== 'all_logs') { 
+        if (key !== 'profile' && config.label !== 'SERVICE_DETAIL' && key !== 'all_logs') {
             const tab = document.createElement('a');
             tab.href = '#';
             tab.className = 'nav-tab' + (key === currentModule ? ' active' : '');
@@ -255,10 +255,10 @@ function initCyberpunkServicesCarousel() {
 
         const containerWidth = servicesInterface.offsetWidth;
         const currentVisibleService = serviceWindows[currentVisualIndex]; // This is the visually active item
-        
+
         // Temporarily remove transforms to get accurate width for centering calculation
         let originalTransform = currentVisibleService.style.transform;
-        currentVisibleService.style.transform = 'none'; 
+        currentVisibleService.style.transform = 'none';
         const itemWidth = currentVisibleService.offsetWidth;
         currentVisibleService.style.transform = originalTransform; // Restore
 
@@ -270,14 +270,14 @@ function initCyberpunkServicesCarousel() {
 
         serviceWindows.forEach((window, i) => {
             window.classList.remove('active', 'prev', 'next');
-            
+
             // Remove previous event listeners to prevent duplicates
             const visualArea = window.querySelector('.service-visual-area');
             if (visualArea) visualArea.removeEventListener('click', handleViewDetailsClickWrapper);
 
             const viewFullDetailsButton = window.querySelector('.view-full-details-btn');
             if (viewFullDetailsButton) {
-                viewFullDetailsButton.removeEventListener('click', handleViewDetailsClickWrapper); 
+                viewFullDetailsButton.removeEventListener('click', handleViewDetailsClickWrapper);
             }
 
             // Apply active, prev, next classes based on currentVisualIndex
@@ -288,7 +288,7 @@ function initCyberpunkServicesCarousel() {
             } else if (i === currentVisualIndex + 1) { // Direct next
                 window.classList.add('next');
             }
-            
+
             // Re-attach event listeners only for real items (not clones)
             if (!window.classList.contains('is-clone')) {
                 if (visualArea) visualArea.addEventListener('click', handleViewDetailsClickWrapper);
@@ -304,7 +304,7 @@ function initCyberpunkServicesCarousel() {
 
         servicePrevBtn.disabled = true;
         serviceNextBtn.disabled = true;
-        
+
         const realItemsCount = serviceWindows.length - (2 * numClonedItems);
         let newVisualIndex = currentVisualIndex + direction;
 
@@ -319,7 +319,7 @@ function initCyberpunkServicesCarousel() {
             needsSnap = true;
             snapToLogicalIndex = newVisualIndex - (serviceWindows.length - numClonedItems); // Equivalent real item at the start
         }
-        
+
         currentVisualIndex = newVisualIndex; // Update visual index for smooth transition
         updateCarousel(true); // Animate to the new visual index
 
@@ -507,7 +507,8 @@ function initializeModuleInteractions(moduleName) {
                 if (typeof initLogsInteractions === 'function') initLogsInteractions();
                 break;
             case 'all_logs':
-                if (typeof initAllLogsInteractions === 'function') initAllLogsInteractions();
+                if (typeof initLogsInteractions === 'function') initLogsInteractions(); // Re-use common log interactions
+                if (typeof initSearchInteractions === 'function') initSearchInteractions(); // Add search interactions
                 break;
             case 'services':
                 attachServiceWindowListeners(); // Always attach click listeners
@@ -545,7 +546,7 @@ function initCreationsInteractions() {
             // openCreationViewer(index); // Assuming this function exists elsewhere
         });
     });
-    
+
     document.addEventListener('keydown', (e) => {
         // if (e.key === 'ArrowLeft') { previousCreation(); }
         // else if (e.key === 'ArrowRight') { nextCreation(); }
@@ -553,10 +554,19 @@ function initCreationsInteractions() {
 }
 
 function initLogsInteractions() {
-    // Enhanced log header click handlers with animations
-    document.querySelectorAll('.log-header').forEach(header => {
-        header.addEventListener('click', function() {
-            const entry = this.closest('.log-entry');
+    // Enhanced log header click handlers with animations and single-expand behavior
+    const logEntries = document.querySelectorAll('.log-entry');
+    logEntries.forEach(entry => {
+        const header = entry.querySelector('.log-header');
+        if (!header) return;
+
+        header.addEventListener('click', function () {
+            // Collapse all other entries
+            logEntries.forEach(other => {
+                if (other !== entry) {
+                    other.classList.remove('expanded');
+                }
+            });
 
             // Add visual feedback during transition
             entry.style.pointerEvents = 'none';
@@ -579,55 +589,73 @@ function initLogsInteractions() {
 
     // Enhanced "Read More" button handlers with better UX
     document.querySelectorAll('.read-more-log').forEach(button => {
-        button.addEventListener('click', function(event) {
+        button.addEventListener('click', function (event) {
             event.stopPropagation(); // Prevent the log-header click from triggering
 
             const logId = this.dataset.logId;
-            if (logId) {
-                // Add loading state to button
-                const originalText = this.textContent;
-                this.textContent = 'LOADING...';
-                this.disabled = true;
-
-                try {
-                    // Call the overlay function
+            if (window.openLogDetailOverlay) {
+                if (logId) {
+                    // Add loading state to button
+                    // ... (existing loading logic, or we can just call it since the overlay handles retrieval)
                     window.openLogDetailOverlay(logId);
-
-                    // Reset button after a short delay
-                    setTimeout(() => {
-                        this.textContent = originalText;
-                        this.disabled = false;
-                    }, 1000);
-
-                } catch (error) {
-                    console.error('Error opening log detail:', error);
-                    this.textContent = 'ERROR';
-                    this.style.borderColor = '#ff3366';
-                    this.style.color = '#ff3366';
-
-                    // Reset after error display
-                    setTimeout(() => {
-                        this.textContent = originalText;
-                        this.disabled = false;
-                        this.style.borderColor = '';
-                        this.style.color = '';
-                    }, 2000);
-
-                    if (window.systemFeedback) {
-                        window.systemFeedback.error('LOG_LOAD_ERROR');
+                } else {
+                    console.error('Log ID not found for "Read More" button. Button HTML:', this.outerHTML);
+                    // Fallback: Try to get ID from parent .log-entry
+                    const parentEntry = this.closest('.log-entry');
+                    if (parentEntry && parentEntry.dataset.logId) {
+                        console.log('Recovered Log ID from parent entry:', parentEntry.dataset.logId);
+                        window.openLogDetailOverlay(parentEntry.dataset.logId);
+                    } else {
+                        if (window.systemFeedback) window.systemFeedback.error('INVALID_LOG_ID');
                     }
                 }
             } else {
-                console.error('Log ID not found for "Read More" button.');
-                if (window.systemFeedback) {
-                    window.systemFeedback.error('INVALID_LOG_ID');
-                }
+                console.error('window.openLogDetailOverlay is not defined! Make sure log-detail.js is loaded.');
+                if (window.systemFeedback) window.systemFeedback.error('SYSTEM_ERROR: MISSING_MODULE');
+            }
+        });
+    });
+
+    // Share buttons (list and overlay)
+    // We remove any previous listeners first to avoid duplicates if re-initialized
+    const shareButtons = document.querySelectorAll('.share-log');
+    shareButtons.forEach(button => {
+        // Clone and replace to remove old listeners (brute force clear)
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+
+        newButton.addEventListener('click', function (event) {
+            event.stopPropagation();
+            event.preventDefault(); // Prevent accidental form submits or link follows
+
+            const logId = this.dataset.logId;
+            if (!logId) {
+                console.error("Share button clicked but no data-log-id found:", this);
+                if (window.systemFeedback) window.systemFeedback.error('INVALID_LOG_ID');
+                return;
+            }
+
+            if (window.shareLogLink) {
+                window.shareLogLink(logId);
+            } else {
+                console.error("window.shareLogLink is not defined. Ensure log-detail.js is loaded.");
+                if (window.systemFeedback) window.systemFeedback.error('SYSTEM_ERROR: SHARE_MODULE_MISSING');
+            }
+        });
+    });
+
+    // Older logs click-to-open (keep styling, add behavior)
+    document.querySelectorAll('.older-log-item[data-log-id]').forEach(item => {
+        item.addEventListener('click', function () {
+            const logId = this.dataset.logId;
+            if (logId && window.openLogDetailOverlay) {
+                window.openLogDetailOverlay(logId);
             }
         });
     });
 
     // Add keyboard navigation for accessibility
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
         // Enter or Space to expand/collapse logs
         if (event.key === 'Enter' || event.key === ' ') {
             const focusedElement = document.activeElement;
@@ -644,16 +672,16 @@ function initLogsInteractions() {
 function initConnectInteractions() {
     const form = document.querySelector('.connect-form');
     if (!form) return;
-    
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const button = form.querySelector('.form-button');
         button.disabled = true;
         button.textContent = 'SENDING...';
-        
+
         const formData = new FormData(form);
-        
+
         try {
             const response = await fetch('/api/submit-contact/', {
                 method: 'POST',
@@ -662,20 +690,20 @@ function initConnectInteractions() {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             });
-            
+
             if (response.ok) {
                 const status = form.querySelector('.form-status');
                 status.textContent = 'MESSAGE TRANSMITTED. RESPONSE INCOMING.';
                 status.classList.add('visible');
                 form.reset();
-                
-                if(window.systemFeedback) systemFeedback.message('CONTACT_RECEIVED', 'success');
+
+                if (window.systemFeedback) systemFeedback.message('CONTACT_RECEIVED', 'success');
             } else {
-                if(window.systemFeedback) systemFeedback.message('TRANSMISSION_FAILED', 'error');
+                if (window.systemFeedback) systemFeedback.message('TRANSMISSION_FAILED', 'error');
             }
         } catch (error) {
             console.error('Form submission failed:', error);
-            if(window.systemFeedback) systemFeedback.message('TRANSMISSION_FAILED', 'error');
+            if (window.systemFeedback) systemFeedback.message('TRANSMISSION_FAILED', 'error');
         } finally {
             button.disabled = false;
             button.textContent = 'TRANSMIT';
@@ -685,7 +713,7 @@ function initConnectInteractions() {
 
 function initAchievementsInteractions() {
     document.querySelectorAll('.achievement-card').forEach(card => {
-        card.addEventListener('mouseenter', function() {
+        card.addEventListener('mouseenter', function () {
             const progress = this.querySelector('.achievement-progress-bar');
             if (progress && !this.classList.contains('locked-achievement')) {
                 // Could trigger unlock animation here
@@ -698,7 +726,7 @@ function initDashboardInteractions() {
     const whaleContainer = document.querySelector('.whale-container');
     if (whaleContainer) {
         whaleContainer.addEventListener('click', () => {
-            if(window.systemFeedback) systemFeedback.message('HERO_ACTIVATED', 'info');
+            if (window.systemFeedback) systemFeedback.message('HERO_ACTIVATED', 'info');
         });
     }
 }
@@ -710,6 +738,36 @@ function systemCommand(command) {
             break;
         default:
             console.log('Unknown command:', command);
+    }
+}
+
+// Initialize interactions for the ALL LOGS page (Search & Filter)
+function initSearchInteractions() {
+    const toggleBtn = document.getElementById('search-toggle-btn');
+    const searchFormContainer = document.getElementById('search-form-container');
+    const backBtn = document.getElementById('back-to-logs-btn');
+
+    if (toggleBtn && searchFormContainer) {
+        // Remove existing listeners to be safe
+        const newToggleBtn = toggleBtn.cloneNode(true);
+        toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+
+        newToggleBtn.addEventListener('click', function () {
+            searchFormContainer.classList.toggle('expanded');
+            if (searchFormContainer.classList.contains('expanded')) {
+                this.textContent = 'Hide Filters';
+                this.classList.add('active');
+            } else {
+                this.textContent = 'Search & Filter';
+                this.classList.remove('active');
+            }
+        });
+    }
+
+    // Ensure back button works (it has inline onclick, but good to double check or enhance)
+    if (backBtn) {
+        // No extra logic needed if onclick="loadModule('logs')" is there, 
+        // but we could add hover effects or sound here if we wanted.
     }
 }
 
