@@ -9,13 +9,13 @@ urlpatterns = [
     # This will now render the SPA shell (index.html)
     path('dashboard/', views.SystemShellView.as_view(), name='dashboard'), 
     
-    # Non-API routes (for direct linking or fallback, if needed)
-    path('achievements/', views.AchievementsView.as_view(), name='achievements'),
-    path('logs/', views.LogsView.as_view(), name='logs'),
-    path('logs/all/', views.AllLogsView.as_view(), name='all_logs'),
-    path('creations/', views.CreationsView.as_view(), name='creations'),
-    path('services/', views.ServicesView.as_view(), name='services'),
-    path('connect/', views.ConnectView.as_view(), name='connect'),
+    # Non-API routes (redirect to SPA shell for proper loading)
+    path('achievements/', views.SystemShellView.as_view(), name='achievements'),
+    path('logs/', views.SystemShellView.as_view(), name='logs'),
+    path('logs/all/', views.SystemShellView.as_view(), name='all_logs'),
+    path('creations/', views.SystemShellView.as_view(), name='creations'),
+    path('services/', views.SystemShellView.as_view(), name='services'),
+    path('connect/', views.SystemShellView.as_view(), name='connect'),
 
     # API routes for dynamic content loading (fetched by navigation.js)
     path('api/content/dashboard/', views.DashboardView.as_view(), name='api-dashboard'),

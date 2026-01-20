@@ -636,7 +636,7 @@ function initLogsInteractions() {
             }
 
             if (window.shareLogLink) {
-                window.shareLogLink(logId);
+                window.shareLogLink(logId, this); // Pass 'this' (the button) for visual feedback
             } else {
                 console.error("window.shareLogLink is not defined. Ensure log-detail.js is loaded.");
                 if (window.systemFeedback) window.systemFeedback.error('SYSTEM_ERROR: SHARE_MODULE_MISSING');

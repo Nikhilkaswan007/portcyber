@@ -152,11 +152,12 @@ function initLogDetailOverlay() {
 }
 
 // Share helper with native share fallback to clipboard
-async function shareLogLink(logId) {
+// Share helper with native share fallback to clipboard
+async function shareLogLink(logId, buttonElement = null) {
     if (shareInProgress) return;
     shareInProgress = true;
 
-    const shareUrl = `${window.location.origin}/logs/?log=${logId}`;
+    const shareUrl = `${window.location.origin}/?log=${logId}`;
     const shareData = {
         title: 'System Log',
         text: 'Check out this log entry',
@@ -169,10 +170,28 @@ async function shareLogLink(logId) {
             if (window.systemFeedback) window.systemFeedback.message('LINK_SHARED', 'success');
         } else if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(shareUrl);
-            if (window.systemFeedback) window.systemFeedback.message('LINK_COPIED', 'success');
+
+            // Button Feedback (User Request)
+            if (buttonElement) {
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = 'COPIED!';
+                buttonElement.style.borderColor = '#00ff88'; // Ensure green border
+                buttonElement.style.color = '#00ff88';
+
+                setTimeout(() => {
+                    buttonElement.innerText = originalText;
+                    // Revert styles
+                    buttonElement.style.borderColor = '';
+                    buttonElement.style.color = '';
+                }, 2000);
+            }
+
+            if (window.systemFeedback) {
+                window.systemFeedback.message('LINK COPIED', 'success');
+            }
         } else {
             // Fallback: prompt for copy
-            window.prompt('Copy log link:', shareUrl);
+            prompt('Copy this link to share:', shareUrl);
         }
     } catch (err) {
         console.error('Share failed:', err);

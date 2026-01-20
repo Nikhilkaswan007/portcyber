@@ -3132,6 +3132,20 @@ select.form-input {
     }
 }
 
+/* Fix: Remove text-hiding gradient and mask in the full overlay view */
+.log-detail-overlay-content .log-body::after {
+    display: none !important;
+    content: none !important;
+}
+
+.log-detail-overlay-content .log-body {
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+}
+
 .log-detail-header {
     display: flex;
     flex-direction: column;
