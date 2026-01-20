@@ -1,19 +1,21 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NK - Digital Operations Console</title>
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
+
 <body>
     <!-- Three.js Background -->
     <div id="three-background"></div>
-    
+
     <!-- Scanline Effect -->
     <div class="scanline"></div>
-    
+
     <!-- Header / Status Bar -->
     <div class="header">
         <div class="level-info">
@@ -39,7 +41,6 @@
         <div class="profile-info">
             <div class="profile-name">Nikhil Kaswan</div>
             <div class="profile-title">Web Developer</div>
-            <div class="profile-company">Legacy.ai</div>
             <div class="profile-status">
                 <div class="status-icon"></div>
                 <span>OPEN FOR HIRE</span>
@@ -92,4 +93,5 @@
     <script src="{% static 'js/services.js' %}"></script>
     <script src="{% static 'js/boot.js' %}"></script>
 </body>
+
 </html>

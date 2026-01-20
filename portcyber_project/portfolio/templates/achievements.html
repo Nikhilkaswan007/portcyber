@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -103,6 +104,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="three-background"></div>
     <div class="scanline"></div>
@@ -130,7 +132,6 @@
         <div class="profile-info">
             <div class="profile-name">{{ profile_name }}</div>
             <div class="profile-title">{{ profile_title }}</div>
-            <div class="profile-company">Legacy.ai</div>
             <div class="profile-status">
                 <div class="status-icon"></div>
                 <span>OPEN FOR HIRE</span>
@@ -231,4 +232,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="{% static 'js/theme.js' %}"></script>
 </body>
+
 </html>
