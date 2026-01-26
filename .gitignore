@@ -3,3 +3,4 @@
 *.sqlite3
 portcyber_project/db.sqlite3
 portcyber_project\.venv
+node_modules/
