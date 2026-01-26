@@ -88,18 +88,25 @@ class SystemShellView(View):
 
         # Daily coin reduction logic
         today = timezone.now().date()
-        if site_stats.last_daily_reduction_check.date() < today:
-            days_since_last_check = (today - site_stats.last_daily_reduction_check).days
+        
+        # 1. Convert the DB value to .date() for the comparison
+        last_check_date = site_stats.last_daily_reduction_check.date()
+
+        if last_check_date < today:
+            # 2. Subtract date from date (this works!)
+            days_since_last_check = (today - last_check_date).days
             reduction = days_since_last_check * 5
             site_stats.coins = max(0, site_stats.coins - reduction)
-            site_stats.last_daily_reduction_check = today
+            
+            # 3. Update the timestamp to the current full time
+            site_stats.last_daily_reduction_check = timezone.now()
             site_stats.save()
 
         context = {
             'level': site_stats.level,
             'trophies': site_stats.trophies,
             'coins': site_stats.coins,
-            'profile_name': 'Nikhil Kaswan', # This is now static
+            'profile_name': 'Nikhil Kaswan',
             'profile_title': 'Web Developer',
             'company': 'Legacy.ai',
         }
