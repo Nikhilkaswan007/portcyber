@@ -7,6 +7,7 @@ from .models import SiteStats, ContactSubmission, LogEntry
 from django.db.models import Q
 from django.utils import timezone
 import json
+from datetime import date
 
 # Dummy data for service details (in a real app, this would be from a DB)
 SERVICE_DETAILS = {
@@ -76,6 +77,10 @@ SERVICE_DETAILS = {
 
 from datetime import date
 today = date.today()
+@classmethod
+def load(cls):
+    obj, created = cls.objects.get_or_create(pk=1)
+    return obj
 
 
 class LandingPageView(View):
