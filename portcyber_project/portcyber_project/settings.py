@@ -126,3 +126,14 @@ STATICFILES_DIRS = [
 
 # Tell WhiteNoise to handle the compression and caching
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Replace your current STATICFILES_STORAGE line with this:
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+# Add these for Cloudflare Tunnel / HTTPS support
+CSRF_TRUSTED_ORIGINS = ['https://portfolio.nikhilkaswan.in']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
