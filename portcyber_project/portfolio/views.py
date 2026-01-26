@@ -74,6 +74,9 @@ SERVICE_DETAILS = {
     }
 }
 
+from datetime import date
+today = date.today()
+
 
 class LandingPageView(View):
     def get(self, request):
@@ -85,7 +88,7 @@ class SystemShellView(View):
 
         # Daily coin reduction logic
         today = timezone.now().date()
-        if site_stats.last_daily_reduction_check < today:
+        if site_stats.last_daily_reduction_check.date() < today:
             days_since_last_check = (today - site_stats.last_daily_reduction_check).days
             reduction = days_since_last_check * 5
             site_stats.coins = max(0, site_stats.coins - reduction)
