@@ -1,22 +1,17 @@
 # Use a solid Python base
 FROM python:3.11-slim
 
-# Install system dependencies for Postgres and general tools
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    gcc \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# ... (keep your ARG and apt-get lines the same) ...
 
 WORKDIR /app
 
-# Point to your subfolder
-COPY portcyber_project/requirements.txt .
+# FIX: Remove "portcyber_project/" prefix because the context is already that folder
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install gunicorn
 
-# Copy the rest of the project
-COPY portcyber_project/ .
+# FIX: Change this to copy everything from the current context
+COPY . .
 
 # Django prep
 RUN python manage.py collectstatic --no-input
